@@ -1,4 +1,4 @@
-#BCIDemos
+# BCIDemos
 
 This repo includes examples of BCI - Brain-Computer Interfaces, using the Brainflow API.
 
