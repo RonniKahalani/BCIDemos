@@ -8,4 +8,7 @@ Example of features
 
 ## Dependencies
 The code depends up on jar files that can be [found here](https://drive.google.com/file/d/124RQcCQjArB9xW4oa_1Qri9ljCv8JVuO/view?usp=drive_link)
-Unzip the files and reference it in your development IDE.
+
+This ZIP file contains all the jar files for Brainflow and Excel integration APIs to execute the demo.
+
+Unzip the file and reference it, as the BrainFlowJars folder, in your development IDE.
