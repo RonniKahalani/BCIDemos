@@ -12,7 +12,7 @@ import org.apache.poi.ss.util.CellReference;
 
 public final class SXSSFLineChart {
 
-    static void createXSSFSheetWithLineChart(XSSFSheet sheet, String chartTitle, String catAxisTitle, String yAxisTitle, XSSFCell[] headers, CellRangeAddress dataRange, XSSFClientAnchor anchor) {
+    static void createXSSFSheetWithLineChart(XSSFSheet sheet, String chartTitle, String catAxisTitle, String yAxisTitle, XSSFCell[] headers, CellRangeAddress dataRange, XSSFClientAnchor anchor, int[] columns) {
 
         XSSFDrawing drawing = sheet.createDrawingPatriarch();
 
@@ -31,24 +31,20 @@ public final class SXSSFLineChart {
         XDDFDataSource<String> xs = XDDFDataSourcesFactory.fromStringCellRange(sheet, new CellRangeAddress(
                 dataRange.getFirstRow(), dataRange.getLastRow(),
                 dataRange.getFirstColumn(), dataRange.getFirstColumn()));
-        XDDFNumericalDataSource<Double> ys1 = XDDFDataSourcesFactory.fromNumericCellRange(sheet, new CellRangeAddress(
-                dataRange.getFirstRow(), dataRange.getLastRow(),
-                dataRange.getFirstColumn() + 2, dataRange.getFirstColumn() + 2));
-        XDDFNumericalDataSource<Double> ys2 = XDDFDataSourcesFactory.fromNumericCellRange(sheet, new CellRangeAddress(
-                dataRange.getFirstRow(), dataRange.getLastRow(),
-                dataRange.getFirstColumn() + 3, dataRange.getFirstColumn() + 3));
 
         XDDFChartData data = chart.createData(ChartTypes.LINE, bottomAxis, leftAxis);
-        XDDFChartData.Series series1 = data.addSeries(xs, ys1);
-        series1.setTitle(headers[0].getStringCellValue(), new CellReference(headers[0]));
-        ((XDDFLineChartData.Series) series1).setSmooth(true);
-        ((XDDFLineChartData.Series) series1).setMarkerStyle(MarkerStyle.NONE);
 
-        XDDFChartData.Series series2 = data.addSeries(xs, ys2);
-        series2.setTitle(headers[1].getStringCellValue(), new CellReference(headers[1]));
-        ((XDDFLineChartData.Series) series2).setSmooth(true);
-        ((XDDFLineChartData.Series) series2).setMarkerSize((short) 6);
-        ((XDDFLineChartData.Series) series2).setMarkerStyle(MarkerStyle.NONE);
+        for(int column : columns) {
+            XDDFNumericalDataSource<Double> ys = XDDFDataSourcesFactory.fromNumericCellRange(sheet, new CellRangeAddress(
+                    dataRange.getFirstRow(), dataRange.getLastRow(),
+                    dataRange.getFirstColumn() + column, dataRange.getFirstColumn() + column));
+
+            XDDFChartData.Series series = data.addSeries(xs, ys);
+            series.setTitle(headers[column].getStringCellValue(), new CellReference(headers[column]));
+            ((XDDFLineChartData.Series) series).setSmooth(true);
+            ((XDDFLineChartData.Series) series).setMarkerStyle(MarkerStyle.NONE);
+
+        }
 
         chart.plot(data);
     }
@@ -98,10 +94,11 @@ public final class SXSSFLineChart {
             headers[i] = cell;
         }
 
+        int[] columns = {5,10};
         // Create line chart.
         createXSSFSheetWithLineChart(sheet, "Brainflow", "Sample", "Value", headers,
                 new CellRangeAddress(DATA_START_ROW, DATA_START_ROW + numSamples - 1, 0, 2),
-                new XSSFClientAnchor(0, 0, 0, 0, 3, 1, 20, DATA_START_ROW + 20)
+                new XSSFClientAnchor(0, 0, 0, 0, 3, 1, 20, DATA_START_ROW + 20), columns
         );
 
         SXSSFWorkbook sWb = new SXSSFWorkbook(wb);
