@@ -52,7 +52,7 @@ public final class SXSSFLineChart {
     static void streamDataIntoSXSSFWorkbook(SXSSFSheet sheet, DataExtractor dataExtractor) throws Exception {
 
         // Create all data rows.
-        for (int sampleIndex = 0; sampleIndex < dataExtractor.getNumSamples(); sampleIndex++) {
+        for (int sampleIndex = 0; sampleIndex < dataExtractor.getSampleCount(); sampleIndex++) {
             sheet.createRow(sampleIndex + 1).createCell(0).setCellValue(sampleIndex + 1);
         }
 
@@ -72,7 +72,7 @@ public final class SXSSFLineChart {
         DataExtractor dataExtractor = new DataExtractor();
         dataExtractor.extractData();
 
-        int numSamples = dataExtractor.getNumSamples();
+        int numSamples = dataExtractor.getSampleCount();
         String[] dataLabels = dataExtractor.getDataLabels();
 
         final int DATA_START_ROW = 1;
@@ -94,7 +94,7 @@ public final class SXSSFLineChart {
             headers[i] = cell;
         }
 
-        int[] columns = {5,10};
+        int[] columns = {5,10, 15};
         // Create line chart.
         createXSSFSheetWithLineChart(sheet, "Brainflow", "Sample", "Value", headers,
                 new CellRangeAddress(DATA_START_ROW, DATA_START_ROW + numSamples - 1, 0, 2),

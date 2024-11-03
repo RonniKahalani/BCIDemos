@@ -1,6 +1,5 @@
 package org.example.bci;
 
-
 import brainflow.*;
 
 import java.util.Arrays;
@@ -9,30 +8,34 @@ import java.util.List;
 
 public class DataExtractor {
 
-    private final HashMap<String, String> eegDescriptions = new HashMap<>();
+    final static int BUFFER_SIZE = 3600;
+    final static int SAMPLE_COUNT = 30;
+    final static long WAIT_MILLIS = 5000;
+
+    private final HashMap<String, String> dataDescriptions = new HashMap<>();
     private String[] dataLabels = null;
     private double[][] data = null;
-    private BoardDescr boardDescr = null;
-    private BrainFlowInputParams params = null;
-    private BoardIds boardId = null;
+    private final BoardDescr boardDescr;
+    private final BrainFlowInputParams params;
+    private final BoardIds boardId;
 
-    private int bufferSize = 3600;
+    private int bufferSize;
 
-    private long waitMillis = 5000;
+    private long waitMillis;
 
-    private int numSamples = 30;
+    private int sampleCount;
 
     public DataExtractor() throws BrainFlowError {
-        this(3600, 5000, 30);
+        this(BoardIds.SYNTHETIC_BOARD, BUFFER_SIZE, WAIT_MILLIS, SAMPLE_COUNT);
     }
-    public DataExtractor(int bufferSize, long waitMillis, int numSamples) throws BrainFlowError {
+    public DataExtractor(BoardIds boardId, int bufferSize, long waitMillis, int sampleCount) throws BrainFlowError {
 
-        this.bufferSize = bufferSize;
-        this.waitMillis = waitMillis;
-        this.numSamples = numSamples;
+        setBufferSize(bufferSize);
+        setWaitMillis(waitMillis);
+        setSampleCount(sampleCount);
 
         params = new BrainFlowInputParams();
-        boardId = BoardIds.SYNTHETIC_BOARD;
+        this.boardId = boardId;
 
         boardDescr = BoardShim.get_board_descr(BoardDescr.class, boardId);
         dumpDescriptor(boardDescr);
@@ -43,32 +46,42 @@ public class DataExtractor {
         return bufferSize;
     }
 
+    public void setBufferSize(int bufferSize) {
+        this.bufferSize = bufferSize;
+    }
+
     public long getWaitMillis() {
         return waitMillis;
     }
 
-    public int getNumSamples() {
-        return numSamples;
+    public void setWaitMillis(long waitMillis) { this.waitMillis = waitMillis;}
+
+    public int getSampleCount() {
+        return sampleCount;
+    }
+
+    public void setSampleCount(int sampleCount) {
+        this.sampleCount = sampleCount;
     }
 
     private void initializeDataLabels() {
 
-        eegDescriptions.put("Fz", "Frontal midline");
-        eegDescriptions.put("C3", "Central left side");
-        eegDescriptions.put("Cz", "Central midline");
-        eegDescriptions.put("C4", "Central right side");
-        eegDescriptions.put("Pz", "Parietal midline");
-        eegDescriptions.put("PO7", "Parieto-Occipital left side");
-        eegDescriptions.put("Oz", "Occipital midline");
-        eegDescriptions.put("PO8", "Parieto-Occipital right side");
-        eegDescriptions.put("F1", "Frontal coronal outer left midline");
-        eegDescriptions.put("F2", "Frontal coronal left midline");
-        eegDescriptions.put("F3", "Frontal coronal right midline");
-        eegDescriptions.put("F4", "Frontal coronal outer right midline");
-        eegDescriptions.put("F5", "Frontal lateral level 3");
-        eegDescriptions.put("F6", "Frontal lateral level 3");
-        eegDescriptions.put("F7", "Frontal left near temple");
-        eegDescriptions.put("F8", "Frontal right near temple");
+        dataDescriptions.put("Fz", "Frontal midline");
+        dataDescriptions.put("C3", "Central left side");
+        dataDescriptions.put("Cz", "Central midline");
+        dataDescriptions.put("C4", "Central right side");
+        dataDescriptions.put("Pz", "Parietal midline");
+        dataDescriptions.put("PO7", "Parieto-Occipital left side");
+        dataDescriptions.put("Oz", "Occipital midline");
+        dataDescriptions.put("PO8", "Parieto-Occipital right side");
+        dataDescriptions.put("F1", "Frontal coronal outer left midline");
+        dataDescriptions.put("F2", "Frontal coronal left midline");
+        dataDescriptions.put("F3", "Frontal coronal right midline");
+        dataDescriptions.put("F4", "Frontal coronal outer right midline");
+        dataDescriptions.put("F5", "Frontal lateral level 3");
+        dataDescriptions.put("F6", "Frontal lateral level 3");
+        dataDescriptions.put("F7", "Frontal left near temple");
+        dataDescriptions.put("F8", "Frontal right near temple");
 
         dataLabels = new String[boardDescr.num_rows + 1];
 
@@ -76,7 +89,7 @@ public class DataExtractor {
         String[] eegNames = boardDescr.eeg_names.split(",");
         for (int row : boardDescr.eeg_channels) {
             String channelName = eegNames[nameIndex++];
-            String eegTitle = eegDescriptions.get(channelName);
+            String eegTitle = dataDescriptions.get(channelName);
             String fullName = eegTitle == null ? channelName : eegTitle + "(" + channelName + ")";
             String value = fullName + " eeg";
             if (boardDescr.eog_channels.contains(row)) {
@@ -111,8 +124,8 @@ public class DataExtractor {
         return data;
     }
 
-    public HashMap<String,String> getEegDescriptions() {
-        return eegDescriptions;
+    public HashMap<String,String> getDataDescriptions() {
+        return dataDescriptions;
     }
 
     public String[] getDataLabels() {
@@ -131,33 +144,75 @@ public class DataExtractor {
         return boardId;
     }
 
+    public void extractData(int sampleCount) throws Exception {
+        this.sampleCount = sampleCount;
+        extractData();
+    }
+
     public void extractData() throws Exception {
         BoardShim.enable_board_logger();
 
-        BoardShim board_shim = new BoardShim(boardId, params);
+        BoardShim board_shim = new BoardShim(boardId, getParams());
         board_shim.prepare_session();
 
-        board_shim.start_stream(bufferSize);
-        BoardShim.log_message(LogLevels.LEVEL_INFO, "Start sleeping in the main thread");
-        Thread.sleep(waitMillis);
+        board_shim.start_stream(getBufferSize());
+        BoardShim.log_message(LogLevels.LEVEL_INFO, "Waiting %sms for data...".formatted(getWaitMillis()));
+        Thread.sleep(getWaitMillis());
         board_shim.stop_stream();
 
         System.out.println(board_shim.get_board_data_count());
         int num_rows = BoardShim.get_num_rows(boardId);
-        data = board_shim.get_current_board_data(numSamples);
+        data = board_shim.get_current_board_data(getSampleCount());
 
         for (int i = 0; i < num_rows; ++i) {
             System.out.println(Arrays.toString(data[i]));
         }
 
         board_shim.release_session();
+
+    }
+
+    public void signalFiltering() throws BrainFlowError {
+
+        int samplingRate = BoardShim.get_sampling_rate(boardId);
+        int[] eeg_channels = BoardShim.get_eeg_channels(boardId);
+
+        int i;
+        for(i = 0; i < eeg_channels.length; ++i) {
+            switch (i) {
+                case 0 ->
+                        DataFilter.perform_lowpass(data[eeg_channels[i]], samplingRate, 50.0, 4, FilterTypes.BESSEL, 0.0);
+                case 1 ->
+                        DataFilter.perform_highpass(data[eeg_channels[i]], samplingRate, 3.0, 4, FilterTypes.BUTTERWORTH, 0.0);
+                case 2 ->
+                        DataFilter.perform_bandpass(data[eeg_channels[i]], samplingRate, 3.0, 50.0, 4, FilterTypes.CHEBYSHEV_TYPE_1, 1.0);
+                case 3 ->
+                        DataFilter.perform_bandstop(data[eeg_channels[i]], samplingRate, 48.0, 52.0, 4, FilterTypes.CHEBYSHEV_TYPE_1, 1.0);
+                default -> DataFilter.remove_environmental_noise(data[eeg_channels[i]], samplingRate, NoiseTypes.FIFTY);
+            }
+        }
+
+    }
+    public void downsample(int period, AggOperations operation) throws BrainFlowError {
+
+        int[] eeg_channels = BoardShim.get_eeg_channels(boardId);
+        System.out.println("Downsampling:");
+        for(int i = 0; i < eeg_channels.length; ++i) {
+            System.out.println("Original data:");
+            System.out.println(Arrays.toString(data[i]));
+            double[] downsampled_data = DataFilter.perform_downsampling(data[eeg_channels[i]], period, operation);
+            System.out.println("Downsampled data:");
+            System.out.println(Arrays.toString(downsampled_data));
+        }
+
     }
 
     public void createDataLabels(List<Integer> values, String labelPrefix) {
         if (values != null) {
             for (int i = 0; i < values.size(); i++) {
-                if (dataLabels[values.get(i)] == null) {
-                    dataLabels[values.get(i)] = labelPrefix + " " + (i + 1);
+                int index = values.get(i);
+                if (dataLabels[index] == null) {
+                    dataLabels[index] = labelPrefix + " " + (i + 1);
                 }
             }
         }
