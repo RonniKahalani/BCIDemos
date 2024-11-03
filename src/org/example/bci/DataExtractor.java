@@ -81,7 +81,7 @@ public class DataExtractor {
         dataDescriptions.put("F7", "Frontal left near temple");
         dataDescriptions.put("F8", "Frontal right near temple");
 
-        dataLabels = new String[boardDescr.num_rows + 1];
+        dataLabels = new String[boardDescr.num_rows];
 
         int nameIndex = 0;
         String[] eegNames = boardDescr.eeg_names.split(",");

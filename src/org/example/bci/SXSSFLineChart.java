@@ -1,20 +1,27 @@
 package org.example.bci;
 
-import java.io.FileOutputStream;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
-import org.apache.poi.xddf.usermodel.chart.*;
-import org.apache.poi.xssf.usermodel.*;
-import org.apache.poi.xssf.streaming.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
+import org.apache.poi.xddf.usermodel.chart.*;
+import org.apache.poi.xssf.streaming.SXSSFSheet;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+import org.apache.poi.xssf.usermodel.*;
+
+import java.io.FileOutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.IntStream;
 
 public final class SXSSFLineChart {
 
-    static void createXSSFSheetWithLineChart(XSSFSheet sheet, String chartTitle, String catAxisTitle, String yAxisTitle, XSSFCell[] headers, CellRangeAddress dataRange, XSSFClientAnchor anchor, int[] columns) {
+    final static String SAMPLE_TITLE = "Sample";
+    final static String VALUE_TITLE = "Value";
 
-        XSSFDrawing drawing = sheet.createDrawingPatriarch();
+    static void createXSSFSheetWithLineChart(XSSFSheet dataSheet, XSSFSheet chartSheet, String chartTitle, String catAxisTitle, String yAxisTitle, XSSFCell[] headers, CellRangeAddress dataRange, XSSFClientAnchor anchor, int[] columns) {
+
+        XSSFDrawing drawing = chartSheet.createDrawingPatriarch();
 
         XSSFChart chart = drawing.createChart(anchor);
         chart.setTitleText(chartTitle);
@@ -28,14 +35,14 @@ public final class SXSSFLineChart {
         XDDFValueAxis leftAxis = chart.createValueAxis(AxisPosition.LEFT);
         leftAxis.setTitle(yAxisTitle);
 
-        XDDFDataSource<String> xs = XDDFDataSourcesFactory.fromStringCellRange(sheet, new CellRangeAddress(
+        XDDFDataSource<String> xs = XDDFDataSourcesFactory.fromStringCellRange(dataSheet, new CellRangeAddress(
                 dataRange.getFirstRow(), dataRange.getLastRow(),
                 dataRange.getFirstColumn(), dataRange.getFirstColumn()));
 
         XDDFChartData data = chart.createData(ChartTypes.LINE, bottomAxis, leftAxis);
 
         for(int column : columns) {
-            XDDFNumericalDataSource<Double> ys = XDDFDataSourcesFactory.fromNumericCellRange(sheet, new CellRangeAddress(
+            XDDFNumericalDataSource<Double> ys = XDDFDataSourcesFactory.fromNumericCellRange(dataSheet, new CellRangeAddress(
                     dataRange.getFirstRow(), dataRange.getLastRow(),
                     dataRange.getFirstColumn() + column, dataRange.getFirstColumn() + column));
 
@@ -75,13 +82,11 @@ public final class SXSSFLineChart {
         int numSamples = dataExtractor.getSampleCount();
         String[] dataLabels = dataExtractor.getDataLabels();
 
-        final int DATA_START_ROW = 1;
-
         XSSFWorkbook wb = new XSSFWorkbook();
-        XSSFSheet sheet = wb.createSheet();
+        XSSFSheet dataSheet = wb.createSheet("Data");
 
         // Create title for first row and first cell.
-        XSSFRow row = sheet.createRow(0);
+        XSSFRow row = dataSheet.createRow(0);
         XSSFCell cell = row.createCell(0);
         cell.setCellValue("Period");
 
@@ -94,21 +99,49 @@ public final class SXSSFLineChart {
             headers[i] = cell;
         }
 
-        int[] columns = {5,10, 15};
-        // Create line chart.
-        createXSSFSheetWithLineChart(sheet, "Brainflow", "Sample", "Value", headers,
-                new CellRangeAddress(DATA_START_ROW, DATA_START_ROW + numSamples - 1, 0, 2),
-                new XSSFClientAnchor(0, 0, 0, 0, 3, 1, 20, DATA_START_ROW + 20), columns
-        );
+
+        List<String> labels = Arrays.stream(dataLabels).toList();
+
+        XSSFSheet chartSheetFrontal = wb.createSheet("Frontal");
+        makeChart(dataSheet, chartSheetFrontal, chartSheetFrontal.getSheetName(), SAMPLE_TITLE, VALUE_TITLE, headers, findColumnsStartingWith(labels, chartSheetFrontal.getSheetName()), numSamples);
+
+        XSSFSheet chartSheetCentral = wb.createSheet("Central");
+        makeChart(dataSheet, chartSheetCentral, chartSheetCentral.getSheetName(), SAMPLE_TITLE, VALUE_TITLE, headers, findColumnsStartingWith(labels, chartSheetCentral.getSheetName()), numSamples);
+
+        XSSFSheet chartSheetGyro = wb.createSheet("Gyro");
+        makeChart(dataSheet, chartSheetGyro, chartSheetGyro.getSheetName(), SAMPLE_TITLE, VALUE_TITLE, headers, findColumnsStartingWith(labels, chartSheetGyro.getSheetName()), numSamples);
+
 
         SXSSFWorkbook sWb = new SXSSFWorkbook(wb);
         SXSSFSheet sSheet = sWb.getSheetAt(0);
         streamDataIntoSXSSFWorkbook(sSheet, dataExtractor);
 
-        String fileName = "brainflow-" + dataExtractor.getBoardId() + "-" + new SimpleDateFormat("yyyyMMddHHmm'.xlsx'").format(new Date());
+        String fileName = "BrainFlow-" + dataExtractor.getBoardId() + "-" + new SimpleDateFormat("yyyyMMddHHmm'.xlsx'").format(new Date());
         FileOutputStream fileOut = new FileOutputStream(fileName);
         sWb.write(fileOut);
         fileOut.close();
         sWb.dispose();
+    }
+
+
+    public static int[] findColumnsStartingWith(List<String> labels, String prefix) {
+
+        return IntStream.range(0, labels.size())
+                .filter(i -> labels.get(i).startsWith(prefix))
+                .boxed()
+                .mapToInt(Integer::intValue)
+                .toArray();
+
+    }
+    public static void makeChart(XSSFSheet dataSheet, XSSFSheet chartSheet, String chartTitle, String catAxisTitle, String yAxisTitle, XSSFCell[] headers, int[] columns, int numSamples) {
+
+
+
+        // Create line chart.
+        createXSSFSheetWithLineChart(dataSheet, chartSheet, chartTitle, catAxisTitle, yAxisTitle, headers,
+                new CellRangeAddress(1,  numSamples, 0, 2),
+                new XSSFClientAnchor(0, 0, 0, 0, 3, 1, 20, 1 + 20), columns
+        );
+
     }
 }
