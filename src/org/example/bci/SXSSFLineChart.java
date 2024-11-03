@@ -22,7 +22,7 @@ public final class SXSSFLineChart {
     final static String SAMPLE_TITLE = "Sample";
     final static String VALUE_TITLE = "Value";
 
-    static void createXSSFSheetWithLineChart(XSSFSheet dataSheet, XSSFSheet chartSheet, String chartTitle, String catAxisTitle, String yAxisTitle, XSSFCell[] headers, CellRangeAddress dataRange, XSSFClientAnchor anchor, int[] columns) {
+    static void createXSSFSheetWithLineChart(XSSFSheet dataSheet, XSSFSheet chartSheet, String chartTitle, String catAxisTitle, String yAxisTitle, XSSFCell[] headers, CellRangeAddress dataRange, XSSFClientAnchor anchor, int[] columns, ChartTypes chartType) {
 
         XSSFDrawing drawing = chartSheet.createDrawingPatriarch();
 
@@ -42,7 +42,7 @@ public final class SXSSFLineChart {
                 dataRange.getFirstRow(), dataRange.getLastRow(),
                 dataRange.getFirstColumn(), dataRange.getFirstColumn()));
 
-        XDDFChartData data = chart.createData(ChartTypes.LINE, bottomAxis, leftAxis);
+        XDDFChartData data = chart.createData(chartType, bottomAxis, leftAxis);
 
         for(int column : columns) {
             XDDFNumericalDataSource<Double> ys = XDDFDataSourcesFactory.fromNumericCellRange(dataSheet, new CellRangeAddress(
@@ -51,8 +51,19 @@ public final class SXSSFLineChart {
 
             XDDFChartData.Series series = data.addSeries(xs, ys);
             series.setTitle(headers[column].getStringCellValue(), new CellReference(headers[column]));
-            ((XDDFLineChartData.Series) series).setSmooth(true);
-            ((XDDFLineChartData.Series) series).setMarkerStyle(MarkerStyle.NONE);
+
+            switch (chartType) {
+                case LINE -> {
+                    ((XDDFLineChartData.Series) series).setSmooth(true);
+                    ((XDDFLineChartData.Series) series).setMarkerStyle(MarkerStyle.NONE);
+                }
+                case LINE3D -> {
+                    ((XDDFLine3DChartData.Series) series).setSmooth(true);
+                    ((XDDFLine3DChartData.Series) series).setMarkerStyle(MarkerStyle.NONE);
+
+                }
+            }
+
 
         }
 
@@ -106,13 +117,13 @@ public final class SXSSFLineChart {
         List<String> labels = Arrays.stream(dataLabels).toList();
 
         XSSFSheet chartSheetFrontal = wb.createSheet("Frontal");
-        makeChart(dataSheet, chartSheetFrontal, chartSheetFrontal.getSheetName(), SAMPLE_TITLE, VALUE_TITLE, headers, findColumnsStartingWith(labels, chartSheetFrontal.getSheetName()), numSamples);
+        makeChart(dataSheet, chartSheetFrontal, chartSheetFrontal.getSheetName(), SAMPLE_TITLE, VALUE_TITLE, headers, findColumnsStartingWith(labels, chartSheetFrontal.getSheetName()), numSamples, false);
 
         XSSFSheet chartSheetCentral = wb.createSheet("Central");
-        makeChart(dataSheet, chartSheetCentral, chartSheetCentral.getSheetName(), SAMPLE_TITLE, VALUE_TITLE, headers, findColumnsStartingWith(labels, chartSheetCentral.getSheetName()), numSamples);
+        makeChart(dataSheet, chartSheetCentral, chartSheetCentral.getSheetName(), SAMPLE_TITLE, VALUE_TITLE, headers, findColumnsStartingWith(labels, chartSheetCentral.getSheetName()), numSamples, true);
 
         XSSFSheet chartSheetGyro = wb.createSheet("Gyro");
-        makeChart(dataSheet, chartSheetGyro, chartSheetGyro.getSheetName(), SAMPLE_TITLE, VALUE_TITLE, headers, findColumnsStartingWith(labels, chartSheetGyro.getSheetName()), numSamples);
+        makeChart(dataSheet, chartSheetGyro, chartSheetGyro.getSheetName(), SAMPLE_TITLE, VALUE_TITLE, headers, findColumnsStartingWith(labels, chartSheetGyro.getSheetName()), numSamples, false);
 
 
         SXSSFWorkbook sWb = new SXSSFWorkbook(wb);
@@ -136,12 +147,12 @@ public final class SXSSFLineChart {
                 .toArray();
 
     }
-    public static void makeChart(XSSFSheet dataSheet, XSSFSheet chartSheet, String chartTitle, String catAxisTitle, String yAxisTitle, XSSFCell[] headers, int[] columns, int numSamples) {
+    public static void makeChart(XSSFSheet dataSheet, XSSFSheet chartSheet, String chartTitle, String catAxisTitle, String yAxisTitle, XSSFCell[] headers, int[] columns, int numSamples, boolean chartType3D) {
 
         // Create line chart.
         createXSSFSheetWithLineChart(dataSheet, chartSheet, chartTitle, catAxisTitle, yAxisTitle, headers,
                 new CellRangeAddress(1,  numSamples, 0, 2),
-                new XSSFClientAnchor(0, 0, 0, 0, 3, 1, 35, 50), columns
+                new XSSFClientAnchor(0, 0, 0, 0, 3, 1, 35, 50), columns, chartType3D ? ChartTypes.LINE3D : ChartTypes.LINE
         );
 
     }
