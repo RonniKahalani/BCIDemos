@@ -1,7 +1,10 @@
 package org.example.bci;
 
+import org.apache.poi.ss.usermodel.ClientAnchor;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
+import org.apache.poi.ss.util.ImageUtils;
+import org.apache.poi.util.Units;
 import org.apache.poi.xddf.usermodel.chart.*;
 import org.apache.poi.xssf.streaming.SXSSFSheet;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
@@ -135,12 +138,10 @@ public final class SXSSFLineChart {
     }
     public static void makeChart(XSSFSheet dataSheet, XSSFSheet chartSheet, String chartTitle, String catAxisTitle, String yAxisTitle, XSSFCell[] headers, int[] columns, int numSamples) {
 
-
-
         // Create line chart.
         createXSSFSheetWithLineChart(dataSheet, chartSheet, chartTitle, catAxisTitle, yAxisTitle, headers,
                 new CellRangeAddress(1,  numSamples, 0, 2),
-                new XSSFClientAnchor(0, 0, 0, 0, 3, 1, 20, 1 + 20), columns
+                new XSSFClientAnchor(0, 0, 0, 0, 3, 1, 35, 50), columns
         );
 
     }
