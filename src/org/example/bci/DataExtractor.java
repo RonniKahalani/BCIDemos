@@ -15,9 +15,9 @@ public class DataExtractor {
     private final HashMap<String, String> dataDescriptions = new HashMap<>();
     private String[] dataLabels = null;
     private double[][] data = null;
-    private final BoardDescr boardDescr;
-    private final BrainFlowInputParams params;
-    private final BoardIds boardId;
+    private BoardDescr boardDescr;
+    private BrainFlowInputParams params;
+    private BoardIds boardId;
 
     private int bufferSize;
 
@@ -26,18 +26,16 @@ public class DataExtractor {
     private int sampleCount;
 
     public DataExtractor() throws BrainFlowError {
-        this(BoardIds.SYNTHETIC_BOARD, BUFFER_SIZE, WAIT_MILLIS, SAMPLE_COUNT);
+        this(BoardIds.SYNTHETIC_BOARD, new BrainFlowInputParams(), BUFFER_SIZE, WAIT_MILLIS, SAMPLE_COUNT);
     }
-    public DataExtractor(BoardIds boardId, int bufferSize, long waitMillis, int sampleCount) throws BrainFlowError {
+    public DataExtractor(BoardIds boardId, BrainFlowInputParams params, int bufferSize, long waitMillis, int sampleCount) throws BrainFlowError {
 
         setBufferSize(bufferSize);
         setWaitMillis(waitMillis);
         setSampleCount(sampleCount);
-
-        params = new BrainFlowInputParams();
-        this.boardId = boardId;
-
-        boardDescr = BoardShim.get_board_descr(BoardDescr.class, boardId);
+        setParams(params);
+        setBoardId(boardId);
+        setBoardDescr(BoardShim.get_board_descr(BoardDescr.class, boardId));
         dumpDescriptor(boardDescr);
         initializeDataLabels();
     }
@@ -136,12 +134,24 @@ public class DataExtractor {
         return boardDescr;
     }
 
+    public void setBoardDescr(BoardDescr boardDescr) {
+        this.boardDescr = boardDescr;
+    }
+
     public BrainFlowInputParams getParams() {
         return params;
     }
 
+    public void setParams(BrainFlowInputParams params) {
+        this.params = params;
+    }
+
     public BoardIds getBoardId() {
         return boardId;
+    }
+
+    public void setBoardId(BoardIds boardId) {
+        this.boardId = boardId;
     }
 
     public void extractData(int sampleCount) throws Exception {
