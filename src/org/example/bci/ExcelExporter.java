@@ -3,6 +3,8 @@ package org.example.bci;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xddf.usermodel.chart.*;
+import org.apache.poi.xssf.streaming.SXSSFCell;
+import org.apache.poi.xssf.streaming.SXSSFRow;
 import org.apache.poi.xssf.streaming.SXSSFSheet;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.*;
@@ -13,6 +15,8 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.IntStream;
+
+import static org.apache.poi.ss.util.CellUtil.createCell;
 
 public final class ExcelExporter {
     final static String SAMPLE_TITLE = "Sample";
@@ -66,8 +70,10 @@ public final class ExcelExporter {
 
     public void streamDataIntoSXSSFWorkbook(SXSSFSheet sheet, DataExtractor dataExtractor) {
 
+        int sampleCount = dataExtractor.getSampleCount();
+        sheet.setRandomAccessWindowSize(sampleCount);
         // Create all data rows.
-        for (int sampleIndex = 0; sampleIndex < dataExtractor.getSampleCount(); sampleIndex++) {
+        for (int sampleIndex = 0; sampleIndex < sampleCount; sampleIndex++) {
             sheet.createRow(sampleIndex + 1).createCell(0).setCellValue(sampleIndex + 1);
         }
 

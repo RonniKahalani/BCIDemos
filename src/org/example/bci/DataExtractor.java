@@ -9,7 +9,7 @@ import java.util.List;
 public class DataExtractor {
 
     final static int BUFFER_SIZE = 3600;
-    final static int SAMPLE_COUNT = 30;
+    final static int SAMPLE_COUNT = 100;
     final static long WAIT_MILLIS = 5000;
 
     private final HashMap<String, String> dataDescriptions = new HashMap<>();
