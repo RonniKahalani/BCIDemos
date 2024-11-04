@@ -1,10 +1,7 @@
 package org.example.bci;
 
-import org.apache.poi.ss.usermodel.ClientAnchor;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
-import org.apache.poi.ss.util.ImageUtils;
-import org.apache.poi.util.Units;
 import org.apache.poi.xddf.usermodel.chart.*;
 import org.apache.poi.xssf.streaming.SXSSFSheet;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
@@ -64,7 +61,6 @@ public final class SXSSFLineChart {
                 }
             }
 
-
         }
 
         chart.plot(data);
@@ -99,31 +95,22 @@ public final class SXSSFLineChart {
         XSSFWorkbook wb = new XSSFWorkbook();
         XSSFSheet dataSheet = wb.createSheet("Data");
 
-        // Create title for first row and first cell.
-        XSSFRow row = dataSheet.createRow(0);
-        XSSFCell cell = row.createCell(0);
-        cell.setCellValue("Period");
-
-        // Setup headers.
-        XSSFCell[] headers = new XSSFCell[dataLabels.length];
-
-        for (int i = 0; i < dataLabels.length; i++) {
-            cell = row.createCell(i + 1);
-            cell.setCellValue(dataLabels[i]);
-            headers[i] = cell;
-        }
-
+        // Create first header row.
+        XSSFCell[] headers = createHeader(dataSheet, dataLabels);
 
         List<String> labels = Arrays.stream(dataLabels).toList();
 
-        XSSFSheet chartSheetFrontal = wb.createSheet("Frontal");
-        makeChart(dataSheet, chartSheetFrontal, chartSheetFrontal.getSheetName(), SAMPLE_TITLE, VALUE_TITLE, headers, findColumnsStartingWith(labels, chartSheetFrontal.getSheetName()), numSamples, false);
+        String prefix = "Frontal";
+        XSSFSheet chartSheetFrontal = wb.createSheet(prefix);
+        makeChart(dataSheet, chartSheetFrontal, prefix, SAMPLE_TITLE, VALUE_TITLE, headers, findColumnsStartingWith(labels, prefix), numSamples, false);
 
-        XSSFSheet chartSheetCentral = wb.createSheet("Central");
-        makeChart(dataSheet, chartSheetCentral, chartSheetCentral.getSheetName(), SAMPLE_TITLE, VALUE_TITLE, headers, findColumnsStartingWith(labels, chartSheetCentral.getSheetName()), numSamples, true);
+        prefix = "Central";
+        XSSFSheet chartSheetCentral = wb.createSheet(prefix);
+        makeChart(dataSheet, chartSheetCentral, prefix, SAMPLE_TITLE, VALUE_TITLE, headers, findColumnsStartingWith(labels, prefix), numSamples, true);
 
-        XSSFSheet chartSheetGyro = wb.createSheet("Gyro");
-        makeChart(dataSheet, chartSheetGyro, chartSheetGyro.getSheetName(), SAMPLE_TITLE, VALUE_TITLE, headers, findColumnsStartingWith(labels, chartSheetGyro.getSheetName()), numSamples, false);
+        prefix = "Gyro";
+        XSSFSheet chartSheetGyro = wb.createSheet(prefix);
+        makeChart(dataSheet, chartSheetGyro, prefix, SAMPLE_TITLE, VALUE_TITLE, headers, findColumnsStartingWith(labels, prefix), numSamples, false);
 
 
         SXSSFWorkbook sWb = new SXSSFWorkbook(wb);
@@ -137,6 +124,24 @@ public final class SXSSFLineChart {
         sWb.dispose();
     }
 
+
+    public static XSSFCell[] createHeader(XSSFSheet dataSheet, String[] dataLabels) {
+        XSSFRow row = dataSheet.createRow(0);
+        XSSFCell cell = row.createCell(0);
+        cell.setCellValue("Period");
+
+        // Setup headers.
+        XSSFCell[] headers = new XSSFCell[dataLabels.length];
+
+        for (int i = 0; i < dataLabels.length; i++) {
+            cell = row.createCell(i + 1);
+            cell.setCellValue(dataLabels[i]);
+            headers[i] = cell;
+        }
+
+        return headers;
+
+    }
 
     public static int[] findColumnsStartingWith(List<String> labels, String prefix) {
 
