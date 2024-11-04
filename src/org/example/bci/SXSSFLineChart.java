@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 public final class SXSSFLineChart {
-
     final static String SAMPLE_TITLE = "Sample";
     final static String VALUE_TITLE = "Value";
 
@@ -60,13 +59,12 @@ public final class SXSSFLineChart {
 
                 }
             }
-
         }
 
         chart.plot(data);
     }
 
-    static void streamDataIntoSXSSFWorkbook(SXSSFSheet sheet, DataExtractor dataExtractor) throws Exception {
+    static void streamDataIntoSXSSFWorkbook(SXSSFSheet sheet, DataExtractor dataExtractor) {
 
         // Create all data rows.
         for (int sampleIndex = 0; sampleIndex < dataExtractor.getSampleCount(); sampleIndex++) {
@@ -112,7 +110,6 @@ public final class SXSSFLineChart {
         XSSFSheet chartSheetGyro = wb.createSheet(prefix);
         makeChart(dataSheet, chartSheetGyro, prefix, SAMPLE_TITLE, VALUE_TITLE, headers, findColumnsStartingWith(labels, prefix), numSamples, false);
 
-
         SXSSFWorkbook sWb = new SXSSFWorkbook(wb);
         SXSSFSheet sSheet = sWb.getSheetAt(0);
         streamDataIntoSXSSFWorkbook(sSheet, dataExtractor);
@@ -140,7 +137,6 @@ public final class SXSSFLineChart {
         }
 
         return headers;
-
     }
 
     public static int[] findColumnsStartingWith(List<String> labels, String prefix) {
