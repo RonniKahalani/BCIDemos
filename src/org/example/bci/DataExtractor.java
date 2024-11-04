@@ -6,6 +6,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * Extracts data from a BCI device.
+ */
 public class DataExtractor {
 
     final static int BUFFER_SIZE = 3600;
@@ -25,9 +28,25 @@ public class DataExtractor {
 
     private int sampleCount;
 
+    /**
+     * Default constructor using the synthetic board device with default properties.
+     *
+     * @throws BrainFlowError
+     */
     public DataExtractor() throws BrainFlowError {
         this(BoardIds.SYNTHETIC_BOARD, new BrainFlowInputParams(), BUFFER_SIZE, WAIT_MILLIS, SAMPLE_COUNT);
     }
+
+    /**
+     * Constructor for a given board device, params, buffer size, wait time and sample count.
+     *
+     * @param boardId
+     * @param params
+     * @param bufferSize
+     * @param waitMillis
+     * @param sampleCount
+     * @throws BrainFlowError
+     */
     public DataExtractor(BoardIds boardId, BrainFlowInputParams params, int bufferSize, long waitMillis, int sampleCount) throws BrainFlowError {
 
         setBufferSize(bufferSize);
@@ -40,28 +59,61 @@ public class DataExtractor {
         initializeDataLabels();
     }
 
+    /**
+     * Returns the buffer size.
+     *
+     * @return size of the buffer.
+     */
     public int getBufferSize() {
         return bufferSize;
     }
 
+    /**
+     * Sets the buffer size.
+     *
+     * @param bufferSize
+     */
     public void setBufferSize(int bufferSize) {
         this.bufferSize = bufferSize;
     }
 
+    /**
+     * Returns the wait time.
+     *
+     * @return wait time in millis.
+     */
     public long getWaitMillis() {
         return waitMillis;
     }
 
+    /**
+     * Sets the wait time in millis.
+     *
+     * @param waitMillis
+     */
     public void setWaitMillis(long waitMillis) { this.waitMillis = waitMillis;}
 
+    /**
+     * Returns the sample count.
+     *
+     * @return sample count.
+     */
     public int getSampleCount() {
         return sampleCount;
     }
 
+    /**
+     * Sets the sample count.
+     *
+     * @param sampleCount
+     */
     public void setSampleCount(int sampleCount) {
         this.sampleCount = sampleCount;
     }
 
+    /**
+     * Initializes the data labels.
+     */
     private void initializeDataLabels() {
 
         dataDescriptions.put("Fz", "Frontal midline");
@@ -118,47 +170,102 @@ public class DataExtractor {
         dataLabels[boardDescr.battery_channel] = "Battery";
     }
 
+    /**
+     * Returns the data.
+     *
+     * @return data.
+     */
     public double[][] getData() {
         return data;
     }
 
+    /**
+     * Returns the data descriptions.
+     *
+     * @return data descriptions.
+     */
     public HashMap<String,String> getDataDescriptions() {
         return dataDescriptions;
     }
 
+    /**
+     * Returns the data labels.
+     *
+     * @return data labels.
+     */
     public String[] getDataLabels() {
         return dataLabels;
     }
 
+    /**
+     * Returns the board descriptors.
+     *
+     * @return board descriptors.
+     */
     public BoardDescr getBoardDescr() {
         return boardDescr;
     }
 
+    /**
+     * Sets the board descriptors.
+     *
+     * @param boardDescr
+     */
     public void setBoardDescr(BoardDescr boardDescr) {
         this.boardDescr = boardDescr;
     }
 
+    /**
+     * Returns the params.
+     *
+     * @return params.
+     */
     public BrainFlowInputParams getParams() {
         return params;
     }
 
+    /**
+     * Sets the params.
+     *
+     * @param params
+     */
     public void setParams(BrainFlowInputParams params) {
         this.params = params;
     }
 
+    /**
+     * Returns the board id.
+     * @return boardId.
+     */
     public BoardIds getBoardId() {
         return boardId;
     }
 
+    /**
+     * Sets the board id.
+     *
+     * @param boardId
+     */
     public void setBoardId(BoardIds boardId) {
         this.boardId = boardId;
     }
 
+    /**
+     * Extracts a specific number of data samples.
+     *
+     * @param sampleCount
+     * @throws Exception
+     */
     public void extractData(int sampleCount) throws Exception {
         this.sampleCount = sampleCount;
         extractData();
     }
 
+    /**
+     * Extracts data, based on the internal sample count.
+     *
+     * @throws Exception
+     */
     public void extractData() throws Exception {
         BoardShim.enable_board_logger();
 
@@ -182,6 +289,11 @@ public class DataExtractor {
 
     }
 
+    /**
+     * Filters data signals.
+     *
+     * @throws BrainFlowError
+     */
     public void signalFiltering() throws BrainFlowError {
 
         int samplingRate = BoardShim.get_sampling_rate(boardId);
@@ -203,6 +315,14 @@ public class DataExtractor {
         }
 
     }
+
+    /**
+     * Downsamples data for a given period and operation.
+     *
+     * @param period
+     * @param operation
+     * @throws BrainFlowError
+     */
     public void downsample(int period, AggOperations operation) throws BrainFlowError {
 
         int[] eeg_channels = BoardShim.get_eeg_channels(boardId);
@@ -217,6 +337,12 @@ public class DataExtractor {
 
     }
 
+    /**
+     * Creates data labels.
+     *
+     * @param values
+     * @param labelPrefix
+     */
     public void createDataLabels(List<Integer> values, String labelPrefix) {
         if (values != null) {
             for (int i = 0; i < values.size(); i++) {
@@ -228,10 +354,21 @@ public class DataExtractor {
         }
     }
 
+    /**
+     * Dumps a list of channels.
+     *
+     * @param channels
+     * @return channels as string.
+     */
     public String dumpChannels(List<Integer> channels) {
         return (channels != null && !channels.isEmpty()) ? channels.toString() : "None";
     }
 
+    /**
+     * Dumps board descriptors.
+     *
+     * @param boardDescr
+     */
     public void dumpDescriptor(BoardDescr boardDescr) {
 
         System.out.println("Name: " + boardDescr.name);
