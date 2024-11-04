@@ -14,11 +14,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.IntStream;
 
-public final class SXSSFLineChart {
+public final class ExcelExporter {
     final static String SAMPLE_TITLE = "Sample";
     final static String VALUE_TITLE = "Value";
 
-    static void createXSSFSheetWithLineChart(XSSFSheet dataSheet, XSSFSheet chartSheet, String chartTitle, String catAxisTitle, String yAxisTitle, XSSFCell[] headers, CellRangeAddress dataRange, XSSFClientAnchor anchor, int[] columns, ChartTypes chartType) {
+    public void createXSSFSheetWithLineChart(XSSFSheet dataSheet, XSSFSheet chartSheet, String chartTitle, String catAxisTitle, String yAxisTitle, XSSFCell[] headers, CellRangeAddress dataRange, XSSFClientAnchor anchor, int[] columns, ChartTypes chartType) {
 
         XSSFDrawing drawing = chartSheet.createDrawingPatriarch();
 
@@ -64,7 +64,7 @@ public final class SXSSFLineChart {
         chart.plot(data);
     }
 
-    static void streamDataIntoSXSSFWorkbook(SXSSFSheet sheet, DataExtractor dataExtractor) {
+    public void streamDataIntoSXSSFWorkbook(SXSSFSheet sheet, DataExtractor dataExtractor) {
 
         // Create all data rows.
         for (int sampleIndex = 0; sampleIndex < dataExtractor.getSampleCount(); sampleIndex++) {
@@ -82,13 +82,7 @@ public final class SXSSFLineChart {
         }
     }
 
-    public static void main(String[] args) throws Exception {
-
-        DataExtractor dataExtractor = new DataExtractor();
-        dataExtractor.extractData();
-
-        int numSamples = dataExtractor.getSampleCount();
-        String[] dataLabels = dataExtractor.getDataLabels();
+    public void generateExcelFile(String fileName, DataExtractor dataExtractor, int sampleCount, String[] dataLabels) throws Exception {
 
         XSSFWorkbook wb = new XSSFWorkbook();
         XSSFSheet dataSheet = wb.createSheet("Data");
@@ -100,21 +94,20 @@ public final class SXSSFLineChart {
 
         String prefix = "Frontal";
         XSSFSheet chartSheetFrontal = wb.createSheet(prefix);
-        makeChart(dataSheet, chartSheetFrontal, prefix, SAMPLE_TITLE, VALUE_TITLE, headers, findColumnsStartingWith(labels, prefix), numSamples, false);
+        makeChart(dataSheet, chartSheetFrontal, prefix, SAMPLE_TITLE, VALUE_TITLE, headers, findColumnsStartingWith(labels, prefix), sampleCount, false);
 
         prefix = "Central";
         XSSFSheet chartSheetCentral = wb.createSheet(prefix);
-        makeChart(dataSheet, chartSheetCentral, prefix, SAMPLE_TITLE, VALUE_TITLE, headers, findColumnsStartingWith(labels, prefix), numSamples, true);
+        makeChart(dataSheet, chartSheetCentral, prefix, SAMPLE_TITLE, VALUE_TITLE, headers, findColumnsStartingWith(labels, prefix), sampleCount, true);
 
         prefix = "Gyro";
         XSSFSheet chartSheetGyro = wb.createSheet(prefix);
-        makeChart(dataSheet, chartSheetGyro, prefix, SAMPLE_TITLE, VALUE_TITLE, headers, findColumnsStartingWith(labels, prefix), numSamples, false);
+        makeChart(dataSheet, chartSheetGyro, prefix, SAMPLE_TITLE, VALUE_TITLE, headers, findColumnsStartingWith(labels, prefix), sampleCount, false);
 
         SXSSFWorkbook sWb = new SXSSFWorkbook(wb);
         SXSSFSheet sSheet = sWb.getSheetAt(0);
         streamDataIntoSXSSFWorkbook(sSheet, dataExtractor);
 
-        String fileName = "BrainFlow-" + dataExtractor.getBoardId() + "-" + new SimpleDateFormat("yyyyMMddHHmm'.xlsx'").format(new Date());
         FileOutputStream fileOut = new FileOutputStream(fileName);
         sWb.write(fileOut);
         fileOut.close();
@@ -122,7 +115,7 @@ public final class SXSSFLineChart {
     }
 
 
-    public static XSSFCell[] createHeader(XSSFSheet dataSheet, String[] dataLabels) {
+    public XSSFCell[] createHeader(XSSFSheet dataSheet, String[] dataLabels) {
         XSSFRow row = dataSheet.createRow(0);
         XSSFCell cell = row.createCell(0);
         cell.setCellValue("Period");
@@ -139,7 +132,7 @@ public final class SXSSFLineChart {
         return headers;
     }
 
-    public static int[] findColumnsStartingWith(List<String> labels, String prefix) {
+    public int[] findColumnsStartingWith(List<String> labels, String prefix) {
 
         return IntStream.range(0, labels.size())
                 .filter(i -> labels.get(i).startsWith(prefix))
@@ -148,7 +141,7 @@ public final class SXSSFLineChart {
                 .toArray();
 
     }
-    public static void makeChart(XSSFSheet dataSheet, XSSFSheet chartSheet, String chartTitle, String catAxisTitle, String yAxisTitle, XSSFCell[] headers, int[] columns, int numSamples, boolean chartType3D) {
+    public void makeChart(XSSFSheet dataSheet, XSSFSheet chartSheet, String chartTitle, String catAxisTitle, String yAxisTitle, XSSFCell[] headers, int[] columns, int numSamples, boolean chartType3D) {
 
         // Create line chart.
         createXSSFSheetWithLineChart(dataSheet, chartSheet, chartTitle, catAxisTitle, yAxisTitle, headers,
