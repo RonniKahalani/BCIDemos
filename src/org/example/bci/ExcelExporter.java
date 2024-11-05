@@ -16,9 +16,6 @@ import java.util.stream.IntStream;
  * Export data and charts to an Excel file.
  */
 public final class ExcelExporter {
-    final static String SAMPLE_TITLE = "Sample";
-    final static String VALUE_TITLE = "Value";
-
     /**
      * Creates a line chart.
      *
@@ -78,12 +75,12 @@ public final class ExcelExporter {
     }
 
     /**
-     * Streams the data into the Excel sheet.
+     * Imports the data into an Excel sheet.
      *
      * @param sheet
      * @param dataExtractor
      */
-    public void streamDataIntoSXSSFWorkbook(SXSSFSheet sheet, DataExtractor dataExtractor) {
+    public void importData(SXSSFSheet sheet, DataExtractor dataExtractor) {
 
         int sampleCount = dataExtractor.getSampleCount();
 
@@ -114,7 +111,7 @@ public final class ExcelExporter {
      * @param dataLabels
      * @throws Exception
      */
-    public void generateExcelFile(String fileName, DataExtractor dataExtractor, int sampleCount, String[] dataLabels) throws Exception {
+    public void generateExcelFile(String fileName, DataExtractor dataExtractor, int sampleCount, String[] dataLabels, List<ChartDescriptor> chartDescriptors) throws Exception {
 
         XSSFWorkbook wb = new XSSFWorkbook();
         XSSFSheet dataSheet = wb.createSheet("Data");
@@ -124,21 +121,14 @@ public final class ExcelExporter {
 
         List<String> labels = Arrays.stream(dataLabels).toList();
 
-        String prefix = "Frontal";
-        XSSFSheet chartSheetFrontal = wb.createSheet(prefix);
-        createChart(dataSheet, chartSheetFrontal, prefix, SAMPLE_TITLE, VALUE_TITLE, headers, findColumnsStartingWith(labels, prefix), sampleCount, false);
-
-        prefix = "Central";
-        XSSFSheet chartSheetCentral = wb.createSheet(prefix);
-        createChart(dataSheet, chartSheetCentral, prefix, SAMPLE_TITLE, VALUE_TITLE, headers, findColumnsStartingWith(labels, prefix), sampleCount, true);
-
-        prefix = "Gyro";
-        XSSFSheet chartSheetGyro = wb.createSheet(prefix);
-        createChart(dataSheet, chartSheetGyro, prefix, SAMPLE_TITLE, VALUE_TITLE, headers, findColumnsStartingWith(labels, prefix), sampleCount, false);
+        for( ChartDescriptor cd : chartDescriptors) {
+            XSSFSheet chartSheet = wb.createSheet(cd.sheetTitle);
+            createChart(dataSheet, chartSheet, cd.chartTitle, cd.xAxisTitle, cd.yAxisTitle, headers, findColumnsStartingWith(labels, cd.columnPattern), sampleCount, cd.chartType3D);
+        }
 
         SXSSFWorkbook sWb = new SXSSFWorkbook(wb);
         SXSSFSheet sSheet = sWb.getSheetAt(0);
-        streamDataIntoSXSSFWorkbook(sSheet, dataExtractor);
+        importData(sSheet, dataExtractor);
 
         FileOutputStream fileOut = new FileOutputStream(fileName);
         sWb.write(fileOut);
@@ -206,6 +196,5 @@ public final class ExcelExporter {
                 new CellRangeAddress(1,  numSamples, 0, 2),
                 new XSSFClientAnchor(0, 0, 0, 0, 3, 1, 35, 50), columns, chartType3D ? ChartTypes.LINE3D : ChartTypes.LINE
         );
-
     }
 }
