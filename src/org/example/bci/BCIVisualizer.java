@@ -15,6 +15,7 @@ public class BCIVisualizer {
 
 
     public static void main(String[] args) throws Exception {
+
         DataExtractor dataExtractor = new DataExtractor();
         dataExtractor.extractData();
 
@@ -23,11 +24,11 @@ public class BCIVisualizer {
         List<ChartDescriptor> chartDescriptors = new ArrayList<>();
 
         String prefix = "Frontal";
-        chartDescriptors.add( new ChartDescriptor(prefix, prefix, true, prefix, SAMPLE_TITLE, VALUE_TITLE));
+        chartDescriptors.add( new ChartDescriptor(prefix, "^" + prefix + ".*$", true, prefix, SAMPLE_TITLE, VALUE_TITLE));
         prefix = "Central";
-        chartDescriptors.add( new ChartDescriptor(prefix, prefix, false, prefix, SAMPLE_TITLE, VALUE_TITLE));
+        chartDescriptors.add( new ChartDescriptor(prefix, "^" + prefix + ".*$", false, prefix, SAMPLE_TITLE, VALUE_TITLE));
         prefix = "Gyro";
-        chartDescriptors.add( new ChartDescriptor(prefix, prefix, true, prefix, SAMPLE_TITLE, VALUE_TITLE));
+        chartDescriptors.add( new ChartDescriptor(prefix, "^" + prefix + ".*$", true, prefix, SAMPLE_TITLE, VALUE_TITLE));
 
         String fileName = "BrainFlow-" + dataExtractor.getBoardId() + "-" + new SimpleDateFormat("yyyyMMddHHmm'.xlsx'").format(new Date());
         exporter.generateExcelFile(fileName, dataExtractor, dataExtractor.getSampleCount(), dataExtractor.getDataLabels(), chartDescriptors);

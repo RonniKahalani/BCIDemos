@@ -140,7 +140,7 @@ public class DataExtractor {
         for (int row : boardDescr.eeg_channels) {
             String channelName = eegNames[nameIndex++];
             String eegTitle = dataDescriptions.get(channelName);
-            String fullName = eegTitle == null ? channelName : eegTitle + "(" + channelName + ")";
+            String fullName = eegTitle == null ? channelName : eegTitle + " (" + channelName + ")";
             String value = fullName + " eeg";
             if (boardDescr.eog_channels.contains(row)) {
                 value += "/eog";

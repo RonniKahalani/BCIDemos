@@ -170,7 +170,7 @@ public final class ExcelExporter {
     public int[] findColumnsStartingWith(List<String> labels, String prefix) {
 
         return IntStream.range(0, labels.size())
-                .filter(i -> labels.get(i).startsWith(prefix))
+                .filter(i -> labels.get(i).matches(prefix))
                 .boxed()
                 .mapToInt(Integer::intValue)
                 .toArray();
