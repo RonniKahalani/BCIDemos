@@ -30,7 +30,7 @@ public final class ExcelExporter {
      * @param columns
      * @param chartType
      */
-    public void createLineChart(XSSFSheet dataSheet, XSSFSheet chartSheet, String chartTitle, String catAxisTitle, String yAxisTitle, XSSFCell[] headers, CellRangeAddress dataRange, XSSFClientAnchor anchor, int[] columns, ChartTypes chartType) {
+    public void createLineChart(XSSFSheet dataSheet, XSSFSheet chartSheet, String chartTitle, String catAxisTitle, String yAxisTitle, XSSFCell[] headers, CellRangeAddress dataRange, XSSFClientAnchor anchor, int[] columns, ChartTypes chartType, MarkerStyle markerStyle) {
 
         XSSFDrawing drawing = chartSheet.createDrawingPatriarch();
 
@@ -63,11 +63,11 @@ public final class ExcelExporter {
             switch (chartType) {
                 case LINE -> {
                     ((XDDFLineChartData.Series) series).setSmooth(true);
-                    ((XDDFLineChartData.Series) series).setMarkerStyle(MarkerStyle.NONE);
+                    ((XDDFLineChartData.Series) series).setMarkerStyle(markerStyle);
                 }
                 case LINE3D -> {
                     ((XDDFLine3DChartData.Series) series).setSmooth(true);
-                    ((XDDFLine3DChartData.Series) series).setMarkerStyle(MarkerStyle.NONE);
+                    ((XDDFLine3DChartData.Series) series).setMarkerStyle(markerStyle);
                 }
             }
         }
@@ -123,7 +123,7 @@ public final class ExcelExporter {
 
         for( ChartDescriptor cd : chartDescriptors) {
             XSSFSheet chartSheet = wb.createSheet(cd.sheetTitle);
-            createChart(dataSheet, chartSheet, cd.chartTitle, cd.xAxisTitle, cd.yAxisTitle, headers, findColumnsStartingWith(labels, cd.columnPattern), sampleCount, cd.chartType3D);
+            createChart(dataSheet, chartSheet, cd.chartTitle, cd.xAxisTitle, cd.yAxisTitle, headers, findColumnsStartingWith(labels, cd.columnPattern), sampleCount, cd.chartType3D, cd.markerStyle);
         }
 
         SXSSFWorkbook sWb = new SXSSFWorkbook(wb);
@@ -189,12 +189,12 @@ public final class ExcelExporter {
      * @param numSamples
      * @param chartType3D
      */
-    public void createChart(XSSFSheet dataSheet, XSSFSheet chartSheet, String chartTitle, String catAxisTitle, String yAxisTitle, XSSFCell[] headers, int[] columns, int numSamples, boolean chartType3D) {
+    public void createChart(XSSFSheet dataSheet, XSSFSheet chartSheet, String chartTitle, String catAxisTitle, String yAxisTitle, XSSFCell[] headers, int[] columns, int numSamples, boolean chartType3D, MarkerStyle markerStyle) {
 
         // Create line chart.
         createLineChart(dataSheet, chartSheet, chartTitle, catAxisTitle, yAxisTitle, headers,
                 new CellRangeAddress(1,  numSamples, 0, 2),
-                new XSSFClientAnchor(0, 0, 0, 0, 3, 1, 35, 50), columns, chartType3D ? ChartTypes.LINE3D : ChartTypes.LINE
+                new XSSFClientAnchor(0, 0, 0, 0, 3, 1, 35, 50), columns, chartType3D ? ChartTypes.LINE3D : ChartTypes.LINE, markerStyle
         );
     }
 }
