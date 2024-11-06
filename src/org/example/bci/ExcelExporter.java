@@ -107,23 +107,23 @@ public final class ExcelExporter {
      * Generates the Excel file with charts.
      * @param fileName
      * @param dataExtractor
-     * @param sampleCount
-     * @param dataLabels
+     * @param chartDescriptors
      * @throws Exception
      */
-    public void generateExcelFile(String fileName, DataExtractor dataExtractor, int sampleCount, String[] dataLabels, List<ChartDescriptor> chartDescriptors) throws Exception {
+    public void generateExcelFile(String fileName, DataExtractor dataExtractor, List<ChartDescriptor> chartDescriptors) throws Exception {
 
         XSSFWorkbook wb = new XSSFWorkbook();
         XSSFSheet dataSheet = wb.createSheet("Data");
 
         // Create first header row.
+        String[] dataLabels = dataExtractor.getDataLabels();
         XSSFCell[] headers = createHeaders(dataSheet, dataLabels);
 
         List<String> labels = Arrays.stream(dataLabels).toList();
 
         for( ChartDescriptor cd : chartDescriptors) {
             XSSFSheet chartSheet = wb.createSheet(cd.sheetTitle);
-            createChart(dataSheet, chartSheet, cd.chartTitle, cd.xAxisTitle, cd.yAxisTitle, headers, findColumnsStartingWith(labels, cd.columnPattern), sampleCount, cd.chartType3D, cd.markerStyle);
+            createChart(dataSheet, chartSheet, cd.chartTitle, cd.xAxisTitle, cd.yAxisTitle, headers, findColumnsStartingWith(labels, cd.columnPattern), dataExtractor.getSampleCount(), cd.chartType3D, cd.markerStyle);
         }
 
         SXSSFWorkbook sWb = new SXSSFWorkbook(wb);

@@ -4,15 +4,25 @@ import org.apache.poi.xddf.usermodel.chart.MarkerStyle;
 
 public class ChartDescriptor {
 
-
     public String sheetTitle;
     public String columnPattern;
     public boolean chartType3D;
     public String chartTitle;
     public String xAxisTitle;
-    public  String yAxisTitle;
+    public String yAxisTitle;
     public MarkerStyle markerStyle;
 
+    /**
+     * Constructor.
+     *
+     * @param sheetTitle
+     * @param columnPattern
+     * @param chartType3D
+     * @param chartTitle
+     * @param xAxisTitle
+     * @param yAxisTitle
+     * @param markerStyle
+     */
     public ChartDescriptor(String sheetTitle, String columnPattern, boolean chartType3D, String chartTitle, String xAxisTitle, String yAxisTitle, MarkerStyle markerStyle) {
         this.sheetTitle = sheetTitle;
         this.columnPattern = columnPattern;

@@ -15,25 +15,58 @@ public class BCIVisualizer {
     final static String SAMPLE_TITLE = "Sample";
     final static String VALUE_TITLE = "Value";
 
+    private static DataExtractor dataExtractor;
+    private static List<ChartDescriptor> chartDescriptors;
 
+    /**
+     * Main entry point.
+     *
+     * @param args
+     * @throws Exception
+     */
     public static void main(String[] args) throws Exception {
 
-        DataExtractor dataExtractor = new DataExtractor();
+        // Get the data from the device.
+        extractData();
+        // Configure the charts.
+        configureCharts();
+        // Export the Excel file.
+        exportExcelFile();
+    }
+
+    /**
+     * Extracts the data from the device.
+     *
+     * @throws Exception
+     */
+    private static void extractData() throws Exception {
+        dataExtractor = new DataExtractor();
         dataExtractor.extractData();
+    }
 
-        ExcelExporter exporter = new ExcelExporter();
-
-        List<ChartDescriptor> chartDescriptors = new ArrayList<>();
+    /**
+     * Configures the Excel charts to be created.
+     */
+    private static void configureCharts() {
+        chartDescriptors = new ArrayList<>();
 
         String prefix = "Frontal";
-        chartDescriptors.add( new ChartDescriptor(prefix, "(?i)^" + prefix + ".*$", true, prefix, SAMPLE_TITLE, VALUE_TITLE, MarkerStyle.DOT));
+        chartDescriptors.add( new ChartDescriptor(prefix, "(?i)^" + prefix + ".*$", false, prefix, SAMPLE_TITLE, VALUE_TITLE, MarkerStyle.DOT));
         prefix = "Central";
         chartDescriptors.add( new ChartDescriptor(prefix, "(?i)^" + prefix + ".*$", false, prefix, SAMPLE_TITLE, VALUE_TITLE, MarkerStyle.DOT));
         prefix = "Gyro";
-        chartDescriptors.add( new ChartDescriptor(prefix, "(?i)^" + prefix + ".*$", true, prefix, SAMPLE_TITLE, VALUE_TITLE, MarkerStyle.DOT));
-
-        String fileName = "BrainFlow-" + dataExtractor.getBoardId() + "-" + new SimpleDateFormat("yyyyMMddHHmm'.xlsx'").format(new Date());
-        exporter.generateExcelFile(fileName, dataExtractor, dataExtractor.getSampleCount(), dataExtractor.getDataLabels(), chartDescriptors);
-
+        chartDescriptors.add( new ChartDescriptor(prefix, "(?i)^" + prefix + ".*$", false, prefix, SAMPLE_TITLE, VALUE_TITLE, MarkerStyle.DOT));
     }
+
+    /**
+     * Exports the Excel file.
+     *
+     * @throws Exception
+     */
+    private static void exportExcelFile() throws Exception {
+        String fileName = "BrainFlow-" + dataExtractor.getBoardId() + "-" + new SimpleDateFormat("yyyyMMddHHmm'.xlsx'").format(new Date());
+        ExcelExporter exporter = new ExcelExporter();
+        exporter.generateExcelFile(fileName, dataExtractor, chartDescriptors);
+    }
+
 }
