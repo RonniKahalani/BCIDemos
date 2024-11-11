@@ -123,7 +123,7 @@ public final class ExcelExporter {
 
         for( ChartDescriptor cd : chartDescriptors) {
             XSSFSheet chartSheet = wb.createSheet(cd.sheetTitle);
-            createChart(dataSheet, chartSheet, cd.chartTitle, cd.xAxisTitle, cd.yAxisTitle, headers, findColumnsStartingWith(labels, cd.columnPattern), dataExtractor.getSampleCount(), cd.chartType3D, cd.markerStyle);
+            createChart(dataSheet, chartSheet, cd.chartTitle, cd.xAxisTitle, cd.yAxisTitle, headers, findMatchingLabelColumns(labels, cd.columnPattern), dataExtractor.getSampleCount(), cd.chartType3D, cd.markerStyle);
         }
 
         SXSSFWorkbook sWb = new SXSSFWorkbook(wb);
@@ -167,7 +167,7 @@ public final class ExcelExporter {
      * @param prefix
      * @return array of indices, for the matching column headers.
      */
-    public int[] findColumnsStartingWith(List<String> labels, String prefix) {
+    public int[] findMatchingLabelColumns(List<String> labels, String prefix) {
 
         return IntStream.range(0, labels.size())
                 .filter(i -> labels.get(i).matches(prefix))
