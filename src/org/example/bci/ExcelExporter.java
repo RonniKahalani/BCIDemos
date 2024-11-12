@@ -8,6 +8,7 @@ import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.*;
 
 import java.io.FileOutputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.IntStream;
@@ -30,7 +31,7 @@ public final class ExcelExporter {
      * @param columns
      * @param chartType
      */
-    public void createLineChart(XSSFSheet dataSheet, XSSFSheet chartSheet, String chartTitle, String catAxisTitle, String yAxisTitle, XSSFCell[] headers, CellRangeAddress dataRange, XSSFClientAnchor anchor, int[] columns, ChartTypes chartType, MarkerStyle markerStyle) {
+    public void createLineChart(XSSFSheet dataSheet, XSSFSheet chartSheet, String chartTitle, String catAxisTitle, String yAxisTitle, XSSFCell[] headers, CellRangeAddress dataRange, XSSFClientAnchor anchor, List<Integer> columns, ChartTypes chartType, MarkerStyle markerStyle) {
 
         XSSFDrawing drawing = chartSheet.createDrawingPatriarch();
 
@@ -55,7 +56,7 @@ public final class ExcelExporter {
         for(int column : columns) {
             XDDFNumericalDataSource<Double> ys = XDDFDataSourcesFactory.fromNumericCellRange(dataSheet, new CellRangeAddress(
                     dataRange.getFirstRow(), dataRange.getLastRow(),
-                    dataRange.getFirstColumn() + column, dataRange.getFirstColumn() + column));
+                    dataRange.getFirstColumn() + column +1, dataRange.getFirstColumn() + column +1));
 
             XDDFChartData.Series series = data.addSeries(xs, ys);
             series.setTitle(headers[column].getStringCellValue(), new CellReference(headers[column]));
@@ -119,16 +120,16 @@ public final class ExcelExporter {
         String[] dataLabels = dataExtractor.getDataLabels();
         XSSFCell[] headers = createHeaders(dataSheet, dataLabels);
 
+        SXSSFWorkbook sWb = new SXSSFWorkbook(wb);
+        SXSSFSheet sSheet = sWb.getSheetAt(0);
+        importData(sSheet, dataExtractor);
+
         List<String> labels = Arrays.stream(dataLabels).toList();
 
         for( ChartDescriptor cd : chartDescriptors) {
             XSSFSheet chartSheet = wb.createSheet(cd.sheetTitle);
-            createChart(dataSheet, chartSheet, cd.chartTitle, cd.xAxisTitle, cd.yAxisTitle, headers, findMatchingLabelColumns(labels, cd.columnPattern), dataExtractor.getSampleCount(), cd.chartType3D, cd.markerStyle);
+            createChart(dataSheet, chartSheet, cd.chartTitle, cd.xAxisTitle, cd.yAxisTitle, headers, findMatchingLabelColumns(labels, cd.columnPatterns), dataExtractor.getSampleCount(), cd.chartType3D, cd.markerStyle);
         }
-
-        SXSSFWorkbook sWb = new SXSSFWorkbook(wb);
-        SXSSFSheet sSheet = sWb.getSheetAt(0);
-        importData(sSheet, dataExtractor);
 
         FileOutputStream fileOut = new FileOutputStream(fileName);
         sWb.write(fileOut);
@@ -161,19 +162,26 @@ public final class ExcelExporter {
     }
 
     /**
-     * Finds columns with a matching header prefix.
-     *
+     * Finds columns with matching header prefixes.
      * @param labels
-     * @param prefix
-     * @return array of indices, for the matching column headers.
+     * @param prefixes
+     * @return
      */
-    public int[] findMatchingLabelColumns(List<String> labels, String prefix) {
+    public List<Integer> findMatchingLabelColumns(List<String> labels, List<String> prefixes) {
 
-        return IntStream.range(0, labels.size())
-                .filter(i -> labels.get(i).matches(prefix))
-                .boxed()
-                .mapToInt(Integer::intValue)
-                .toArray();
+         List<Integer> result = new ArrayList<>();
+                 for(String prefix: prefixes) {
+                     int[] indices = IntStream.range(0, labels.size())
+                             .filter(i -> labels.get(i).matches(prefix))
+                             .boxed()
+                             .mapToInt(Integer::intValue)
+                             .toArray();
+                     for(int value: indices) {
+                         result.add(value);
+                     }
+                 }
+
+         return result;
     }
 
     /**
@@ -189,7 +197,7 @@ public final class ExcelExporter {
      * @param numSamples
      * @param chartType3D
      */
-    public void createChart(XSSFSheet dataSheet, XSSFSheet chartSheet, String chartTitle, String catAxisTitle, String yAxisTitle, XSSFCell[] headers, int[] columns, int numSamples, boolean chartType3D, MarkerStyle markerStyle) {
+    public void createChart(XSSFSheet dataSheet, XSSFSheet chartSheet, String chartTitle, String catAxisTitle, String yAxisTitle, XSSFCell[] headers, List<Integer> columns, int numSamples, boolean chartType3D, MarkerStyle markerStyle) {
 
         // Create line chart.
         createLineChart(dataSheet, chartSheet, chartTitle, catAxisTitle, yAxisTitle, headers,

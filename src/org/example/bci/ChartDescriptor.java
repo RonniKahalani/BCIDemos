@@ -2,10 +2,12 @@ package org.example.bci;
 
 import org.apache.poi.xddf.usermodel.chart.MarkerStyle;
 
+import java.util.List;
+
 public class ChartDescriptor {
 
     public String sheetTitle;
-    public String columnPattern;
+    public List<String> columnPatterns;
     public boolean chartType3D;
     public String chartTitle;
     public String xAxisTitle;
@@ -16,16 +18,16 @@ public class ChartDescriptor {
      * Constructor.
      *
      * @param sheetTitle
-     * @param columnPattern
+     * @param columnPatterns
      * @param chartType3D
      * @param chartTitle
      * @param xAxisTitle
      * @param yAxisTitle
      * @param markerStyle
      */
-    public ChartDescriptor(String sheetTitle, String columnPattern, boolean chartType3D, String chartTitle, String xAxisTitle, String yAxisTitle, MarkerStyle markerStyle) {
+    public ChartDescriptor(String sheetTitle, List<String> columnPatterns, boolean chartType3D, String chartTitle, String xAxisTitle, String yAxisTitle, MarkerStyle markerStyle) {
         this.sheetTitle = sheetTitle;
-        this.columnPattern = columnPattern;
+        this.columnPatterns = columnPatterns;
         this.chartType3D = chartType3D;
         this.chartTitle = chartTitle;
         this.xAxisTitle = xAxisTitle;

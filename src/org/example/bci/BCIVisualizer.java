@@ -4,6 +4,7 @@ import org.apache.poi.xddf.usermodel.chart.MarkerStyle;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -48,14 +49,13 @@ public class BCIVisualizer {
      * Configures the Excel charts to be created.
      */
     private static void configureCharts() {
-        chartDescriptors = new ArrayList<>();
 
-        String prefix = "Frontal";
-        chartDescriptors.add( new ChartDescriptor(prefix, "(?i)^" + prefix + ".*$", false, prefix, SAMPLE_TITLE, VALUE_TITLE, MarkerStyle.DOT));
-        prefix = "Central";
-        chartDescriptors.add( new ChartDescriptor(prefix, "(?i)^" + prefix + ".*$", false, prefix, SAMPLE_TITLE, VALUE_TITLE, MarkerStyle.DOT));
-        prefix = "Gyro";
-        chartDescriptors.add( new ChartDescriptor(prefix, "(?i)^" + prefix + ".*$", false, prefix, SAMPLE_TITLE, VALUE_TITLE, MarkerStyle.DOT));
+        String[] titles = {"Frontal", "Central", "Occipital", "Gyro"};
+        chartDescriptors = new ArrayList<>();
+        chartDescriptors.add( new ChartDescriptor(titles[0], List.of("(?i)^F.*$"), false, titles[0], SAMPLE_TITLE, VALUE_TITLE, MarkerStyle.DOT));
+        chartDescriptors.add( new ChartDescriptor(titles[1], List.of("(?i)^C.*$"), false, titles[1], SAMPLE_TITLE, VALUE_TITLE, MarkerStyle.DOT));
+        chartDescriptors.add( new ChartDescriptor(titles[2], List.of("(?i)^O.*$", "(?i)^PO.*$", "(?i)^Pz.*$"), false, titles[2], SAMPLE_TITLE, VALUE_TITLE, MarkerStyle.DOT));
+        chartDescriptors.add( new ChartDescriptor(titles[3], List.of("(?i)^Gyro.*$"), false, titles[3], SAMPLE_TITLE, VALUE_TITLE, MarkerStyle.DOT));
     }
 
     /**
