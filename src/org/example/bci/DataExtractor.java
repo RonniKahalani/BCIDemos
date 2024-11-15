@@ -290,51 +290,91 @@ public class DataExtractor {
     }
 
     /**
-     * Filters data signals.
+     * Low pass signal filter.
      *
+     * @param dataChannel
+     * @param samplingRate
+     * @param cutOff
+     * @param order
+     * @param filterType
+     * @param ripple
      * @throws BrainFlowError
      */
-    public void signalFiltering() throws BrainFlowError {
-
-        int samplingRate = BoardShim.get_sampling_rate(boardId);
-        int[] eeg_channels = BoardShim.get_eeg_channels(boardId);
-
-        int i;
-        for(i = 0; i < eeg_channels.length; ++i) {
-            switch (i) {
-                case 0 ->
-                        DataFilter.perform_lowpass(data[eeg_channels[i]], samplingRate, 50.0, 4, FilterTypes.BESSEL, 0.0);
-                case 1 ->
-                        DataFilter.perform_highpass(data[eeg_channels[i]], samplingRate, 3.0, 4, FilterTypes.BUTTERWORTH, 0.0);
-                case 2 ->
-                        DataFilter.perform_bandpass(data[eeg_channels[i]], samplingRate, 3.0, 50.0, 4, FilterTypes.CHEBYSHEV_TYPE_1, 1.0);
-                case 3 ->
-                        DataFilter.perform_bandstop(data[eeg_channels[i]], samplingRate, 48.0, 52.0, 4, FilterTypes.CHEBYSHEV_TYPE_1, 1.0);
-                default -> DataFilter.remove_environmental_noise(data[eeg_channels[i]], samplingRate, NoiseTypes.FIFTY);
-            }
-        }
-
+    public void filterLowPass(double[] dataChannel, int samplingRate, double cutOff, int order, FilterTypes filterType, double ripple) throws BrainFlowError {
+        DataFilter.perform_lowpass(dataChannel, samplingRate, cutOff, order, filterType, ripple);
     }
+
+    /**
+     * High pass signal filter.
+     *
+     * @param dataChannel
+     * @param samplingRate
+     * @param cutOff
+     * @param order
+     * @param filterType
+     * @param ripple
+     * @throws BrainFlowError
+     */
+    public void filterHighPass(double[] dataChannel, int samplingRate, double cutOff, int order, FilterTypes filterType, double ripple) throws BrainFlowError {
+        DataFilter.perform_highpass(dataChannel, samplingRate, cutOff, order, filterType, ripple);
+    }
+
+    /**
+     * Bans pass signal filter.
+     * @param dataChannel
+     * @param samplingRate
+     * @param startFrequency
+     * @param stopFrequency
+     * @param order
+     * @param filterType
+     * @param ripple
+     * @throws BrainFlowError
+     */
+    public void filterBandPass(double[] dataChannel, int samplingRate, double startFrequency, double stopFrequency, int order, FilterTypes filterType, double ripple) throws BrainFlowError {
+        DataFilter.perform_bandpass(dataChannel, samplingRate, startFrequency, stopFrequency, order, filterType, ripple);
+    }
+
+    /**
+     * Bans stop signal filter.
+     *
+     * @param dataChannel
+     * @param samplingRate
+     * @param startFrequency
+     * @param stopFrequency
+     * @param order
+     * @param filterType
+     * @param ripple
+     * @throws BrainFlowError
+     */
+
+    public void filterBandStop(double[] dataChannel, int samplingRate, double startFrequency, double stopFrequency, int order, FilterTypes filterType, double ripple) throws BrainFlowError {
+        DataFilter.perform_bandstop(dataChannel, samplingRate, startFrequency, stopFrequency, order, filterType, ripple);
+    }
+
+    /**
+     * Remove environmental noise signal filter.
+     *
+     * @param dataChannel
+     * @param samplingRate
+     * @param noiseType
+     * @throws BrainFlowError
+     */
+    public void filterRemoveEnvironmentalNoise(double[] dataChannel, int samplingRate, NoiseTypes noiseType) throws BrainFlowError {
+        DataFilter.remove_environmental_noise(dataChannel, samplingRate, noiseType);
+    }
+
+
 
     /**
      * Downsamples data for a given period and operation.
      *
+     * @param dataChannel
      * @param period
      * @param operation
      * @throws BrainFlowError
      */
-    public void downsample(int period, AggOperations operation) throws BrainFlowError {
-
-        int[] eeg_channels = BoardShim.get_eeg_channels(boardId);
-        System.out.println("Downsampling:");
-        for(int i = 0; i < eeg_channels.length; ++i) {
-            System.out.println("Original data:");
-            System.out.println(Arrays.toString(data[i]));
-            double[] downsampled_data = DataFilter.perform_downsampling(data[eeg_channels[i]], period, operation);
-            System.out.println("Downsampled data:");
-            System.out.println(Arrays.toString(downsampled_data));
-        }
-
+    public double[] downsample(double[] dataChannel, int period, AggOperations operation) throws BrainFlowError {
+        return DataFilter.perform_downsampling(dataChannel, period, operation);
     }
 
     /**

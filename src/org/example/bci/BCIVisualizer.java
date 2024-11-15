@@ -1,5 +1,6 @@
 package org.example.bci;
 
+import brainflow.AggOperations;
 import org.apache.poi.xddf.usermodel.chart.MarkerStyle;
 
 import java.text.SimpleDateFormat;
