@@ -1,6 +1,8 @@
 package org.example.bci;
 
 import brainflow.AggOperations;
+import brainflow.BoardIds;
+import brainflow.BrainFlowInputParams;
 import org.apache.poi.xddf.usermodel.chart.MarkerStyle;
 
 import java.text.SimpleDateFormat;
@@ -29,7 +31,7 @@ public class BCIVisualizer {
     public static void main(String[] args) throws Exception {
 
         // Get the data from the device.
-        extractData();
+        extractData(args);
         // Configure the charts.
         configureCharts();
         // Export the Excel file.
@@ -41,8 +43,11 @@ public class BCIVisualizer {
      *
      * @throws Exception
      */
-    private static void extractData() throws Exception {
-        dataExtractor = new DataExtractor();
+    private static void extractData(String[] args) throws Exception {
+        BrainFlowInputParams params = new BrainFlowInputParams();
+        int boardId = ParamParser.parseParams(args, params);
+
+        dataExtractor = new DataExtractor(boardId, params, DataExtractor.BUFFER_SIZE, DataExtractor.WAIT_MILLIS, DataExtractor.SAMPLE_COUNT);
         dataExtractor.extractData();
     }
 
@@ -65,7 +70,7 @@ public class BCIVisualizer {
      * @throws Exception
      */
     private static void exportExcelFile() throws Exception {
-        String fileName = "BrainFlow-" + dataExtractor.getBoardId() + "-" + new SimpleDateFormat("yyyyMMddHHmm'.xlsx'").format(new Date());
+        String fileName = "BrainFlow-" + BoardIds.from_code(dataExtractor.getBoardId()) + "-" + new SimpleDateFormat("yyyyMMddHHmm'.xlsx'").format(new Date());
         ExcelExporter exporter = new ExcelExporter();
         exporter.generateExcelFile(fileName, dataExtractor, chartDescriptors);
     }

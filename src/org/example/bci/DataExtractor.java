@@ -20,7 +20,7 @@ public class DataExtractor {
     private double[][] data = null;
     private BoardDescr boardDescr;
     private BrainFlowInputParams params;
-    private BoardIds boardId;
+    private int boardId;
 
     private int bufferSize;
 
@@ -28,14 +28,6 @@ public class DataExtractor {
 
     private int sampleCount;
 
-    /**
-     * Default constructor using the synthetic board device with default properties.
-     *
-     * @throws BrainFlowError
-     */
-    public DataExtractor() throws BrainFlowError {
-        this(BoardIds.SYNTHETIC_BOARD, new BrainFlowInputParams(), BUFFER_SIZE, WAIT_MILLIS, SAMPLE_COUNT);
-    }
 
     /**
      * Constructor for a given board device, params, buffer size, wait time and sample count.
@@ -47,7 +39,7 @@ public class DataExtractor {
      * @param sampleCount
      * @throws BrainFlowError
      */
-    public DataExtractor(BoardIds boardId, BrainFlowInputParams params, int bufferSize, long waitMillis, int sampleCount) throws BrainFlowError {
+    public DataExtractor(int boardId, BrainFlowInputParams params, int bufferSize, long waitMillis, int sampleCount) throws BrainFlowError {
 
         setBufferSize(bufferSize);
         setWaitMillis(waitMillis);
@@ -237,7 +229,7 @@ public class DataExtractor {
      * Returns the board id.
      * @return boardId.
      */
-    public BoardIds getBoardId() {
+    public int getBoardId() {
         return boardId;
     }
 
@@ -246,7 +238,7 @@ public class DataExtractor {
      *
      * @param boardId
      */
-    public void setBoardId(BoardIds boardId) {
+    public void setBoardId(int boardId) {
         this.boardId = boardId;
     }
 
