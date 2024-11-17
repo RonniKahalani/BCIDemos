@@ -30,8 +30,11 @@ public class BCIVisualizer {
      */
     public static void main(String[] args) throws Exception {
 
+        BrainFlowInputParams params = new BrainFlowInputParams();
+        int boardId = ParamParser.parseParams(args, params);
+
         // Get the data from the device.
-        extractData(args);
+        extractData( boardId, params);
         // Configure the charts.
         configureCharts();
         // Export the Excel file.
@@ -43,10 +46,7 @@ public class BCIVisualizer {
      *
      * @throws Exception
      */
-    private static void extractData(String[] args) throws Exception {
-        BrainFlowInputParams params = new BrainFlowInputParams();
-        int boardId = ParamParser.parseParams(args, params);
-
+    private static void extractData(int boardId, BrainFlowInputParams params) throws Exception {
         dataExtractor = new DataExtractor(boardId, params, DataExtractor.BUFFER_SIZE, DataExtractor.WAIT_MILLIS, DataExtractor.SAMPLE_COUNT);
         dataExtractor.extractData();
     }
