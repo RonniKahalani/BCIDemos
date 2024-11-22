@@ -11,8 +11,8 @@ import java.util.List;
  */
 public class DataExtractor {
 
-    final static int BUFFER_SIZE = 3600;
-    final static int SAMPLE_COUNT = 100;
+    final static int BUFFER_SIZE = 250;
+    final static int SAMPLE_COUNT = 250;
     final static long WAIT_MILLIS = 5000;
 
     private final HashMap<String, String> dataDescriptions = new HashMap<>();
@@ -28,6 +28,9 @@ public class DataExtractor {
 
     private int sampleCount;
 
+    private int samplingRate;
+
+    private double oxygenLevel;
 
     /**
      * Constructor for a given board device, params, buffer size, wait time and sample count.
@@ -46,9 +49,18 @@ public class DataExtractor {
         setSampleCount(sampleCount);
         setParams(params);
         setBoardId(boardId);
+        setSamplingRate(BoardShim.get_sampling_rate(boardId));
         setBoardDescr(BoardShim.get_board_descr(BoardDescr.class, boardId));
         dumpDescriptor(boardDescr);
         initializeDataLabels();
+    }
+
+    public void setSamplingRate(int samplingRate) {
+        this.samplingRate = samplingRate;
+    }
+
+    public int getSamplingRate() {
+        return samplingRate;
     }
 
     /**
@@ -279,8 +291,20 @@ public class DataExtractor {
 
         board_shim.release_session();
 
+        extractOxygenLevel();
     }
 
+    /**
+     * Extracts the oxygen level from the data,
+     *
+     * @throws BrainFlowError
+     */
+    private void extractOxygenLevel() throws BrainFlowError {
+        int[] ppgChannels = BoardShim.get_ppg_channels(boardId);
+        double[] ppgIr = data[ppgChannels[1]];
+        double[] ppgRed = data[ppgChannels[0]];
+        oxygenLevel = DataFilter.get_oxygen_level(ppgIr, ppgRed, samplingRate);
+    }
     /**
      * Low pass signal filter.
      *
@@ -426,5 +450,13 @@ public class DataExtractor {
         System.out.println("Timestamp channel: " + boardDescr.timestamp_channel);
         System.out.println("Package num channel: " + boardDescr.package_num_channel);
 
+    }
+
+    public double getOxygenLevel() {
+        return oxygenLevel;
+    }
+
+    public void setOxygenLevel(double oxygenLevel) {
+        this.oxygenLevel = oxygenLevel;
     }
 }

@@ -1,13 +1,11 @@
 package org.example.bci;
 
-import brainflow.AggOperations;
 import brainflow.BoardIds;
 import brainflow.BrainFlowInputParams;
 import org.apache.poi.xddf.usermodel.chart.MarkerStyle;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
