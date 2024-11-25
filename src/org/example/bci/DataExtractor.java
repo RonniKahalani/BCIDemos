@@ -11,8 +11,8 @@ import java.util.List;
  */
 public class DataExtractor {
 
-    final static int BUFFER_SIZE = 250;
-    final static int SAMPLE_COUNT = 250;
+    final static int BUFFER_SIZE = 1024;
+    final static int SAMPLE_COUNT = BUFFER_SIZE;
     final static long WAIT_MILLIS = 5000;
 
     private final HashMap<String, String> dataDescriptions = new HashMap<>();
@@ -31,6 +31,8 @@ public class DataExtractor {
     private int samplingRate;
 
     private double oxygenLevel;
+
+    private double heartRate;
 
     /**
      * Constructor for a given board device, params, buffer size, wait time and sample count.
@@ -291,20 +293,51 @@ public class DataExtractor {
 
         board_shim.release_session();
 
-        extractOxygenLevel();
+        extractPPGValues();
     }
 
     /**
-     * Extracts the oxygen level from the data,
+     * Extracts different PPG values.
      *
      * @throws BrainFlowError
      */
-    private void extractOxygenLevel() throws BrainFlowError {
+    private void extractPPGValues() throws BrainFlowError {
         int[] ppgChannels = BoardShim.get_ppg_channels(boardId);
         double[] ppgIr = data[ppgChannels[1]];
         double[] ppgRed = data[ppgChannels[0]];
+
+        extractOxygenLevel(ppgIr, ppgRed, samplingRate);
+        extractHeartRate(ppgIr, ppgRed, samplingRate, BUFFER_SIZE);
+
+        System.out.println("Oxygen level: " + getOxygenLevel());
+        System.out.println("Heart rate: " + getHeartRate());
+    }
+
+    /**
+     * Extracts the oxygen level from the data.
+     *
+     * @param ppgIr
+     * @param ppgRed
+     * @param samplingRate
+     * @throws BrainFlowError
+     */
+    private void extractOxygenLevel(double[] ppgIr, double[] ppgRed,int samplingRate) throws BrainFlowError {
         oxygenLevel = DataFilter.get_oxygen_level(ppgIr, ppgRed, samplingRate);
     }
+
+    /**
+     * Extracts the heart rate from the data.
+     *
+     * @param ppgIr
+     * @param ppgRed
+     * @param samplingRate
+     * @param fftSize
+     * @throws BrainFlowError
+     */
+    private void extractHeartRate(double[] ppgIr, double[] ppgRed, int samplingRate, int fftSize) throws BrainFlowError {
+        heartRate = DataFilter.get_heart_rate(ppgIr, ppgRed, samplingRate, fftSize);
+    }
+
     /**
      * Low pass signal filter.
      *
@@ -458,5 +491,13 @@ public class DataExtractor {
 
     public void setOxygenLevel(double oxygenLevel) {
         this.oxygenLevel = oxygenLevel;
+    }
+
+    public double getHeartRate() {
+        return heartRate;
+    }
+
+    public void setHeartRate(double heartRate) {
+        this.heartRate = heartRate;
     }
 }
