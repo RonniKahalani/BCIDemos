@@ -37,31 +37,50 @@ Start the app by running the main method in BCIVisualizer.java, with its default
 
 ### Configuration Dump
 The first thing you'll see, is a configuration dump from the board:
+
 Name: Synthetic
 Sampling rate: 250
+
 Num rows: 32
+
 EEG names: Fz,C3,Cz,C4,Pz,PO7,Oz,PO8,F5,F7,F3,F1,F2,F4,F6,F8
+
 EEG channels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+
 ACCEL channels: [17, 18, 19]
+
 EDA channels: [23]
+
 EOG channels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+
 EMG channels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+
 EXG channels: None
+
 Gyro channels: [20, 21, 22]
+
 PGG channels: [24, 25]
+
 Temperature channels: [26]
+
 Resistance channels: [27, 28]
+
 Rotation channels: None
+
 Other channels: None
+
 Battery channel: 29
+
 Marker channel: 31
+
 Timestamp channel: 30
+
 Package num channel: 0
 
 ### Data Streaming
 Waiting for data...which is read as a two-dimensional double data[Channel][Datapoints] array. And the channel definitions/metadata are in the configuration dump listed above.
 Images of the app:
-- ![BCIVisualizer](https://learningisliving.dk/wp-content/uploads/2024/12/bci-excel-chart.png)
+![BCIVisualizer](https://learningisliving.dk/wp-content/uploads/2024/12/bci-excel-chart.png)
 
 ### Dependencies
 The code depends up on different jar files that can be found here [BrainFlowJars.zip](https://drive.google.com/file/d/124RQcCQjArB9xW4oa_1Qri9ljCv8JVuO/view?usp=drive_link), and related as external libraries.
