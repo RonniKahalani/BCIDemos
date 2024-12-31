@@ -1,4 +1,4 @@
-package org.example.bci;
+package org.example.bci.visualizer;
 
 import brainflow.BoardIds;
 import brainflow.BrainFlowInputParams;

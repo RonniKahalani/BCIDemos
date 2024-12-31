@@ -1,18 +1,21 @@
-package org.example.bci;
+package org.example.bci.visualizer;
 
 import org.apache.poi.xddf.usermodel.chart.MarkerStyle;
 
 import java.util.List;
 
+/**
+ * Describes a chart to be created.
+ */
 public class ChartDescriptor {
 
-    public String sheetTitle;
-    public List<String> columnPatterns;
-    public boolean chartType3D;
-    public String chartTitle;
-    public String xAxisTitle;
-    public String yAxisTitle;
-    public MarkerStyle markerStyle;
+    public final String sheetTitle;
+    public final List<String> columnPatterns;
+    public final boolean chartType3D;
+    public final String chartTitle;
+    public final String xAxisTitle;
+    public final String yAxisTitle;
+    public final MarkerStyle markerStyle;
 
     /**
      * Constructor.

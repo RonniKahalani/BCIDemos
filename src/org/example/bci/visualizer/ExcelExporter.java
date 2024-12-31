@@ -1,4 +1,4 @@
-package org.example.bci;
+package org.example.bci.visualizer;
 
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;

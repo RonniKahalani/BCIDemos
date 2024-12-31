@@ -1,7 +1,10 @@
-package org.example.bci;
+package org.example.bci.visualizer;
 
 import brainflow.BrainFlowInputParams;
 
+/**
+ * Parses the command line parameters.
+ */
 public class ParamParser {
     public static int parseParams(String[] args, BrainFlowInputParams params) {
         int boardId = -1;
