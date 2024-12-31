@@ -74,7 +74,29 @@ Package num channel: 0
 
 ### Data Streaming
 Waiting for data...which is read as a two-dimensional double data[Channel][Datapoints] array. And the channel definitions/metadata are in the configuration dump listed above.
-Images of the app:
+
+Yes data is here:
+[198.0, 199.0, 200.0, 201.0, 202.0, 203.0, 204.0, 205.0, 206.0, 207.0, 208.0, 209.0, 210.0, 211.0, 212.0, 213.0, 214.0, 215.0, 216.0, 217.0, 218.0, 219.0, 220.0, 221.0, 222.0, 223.0, 224.0, 225.0, 226.0, 227.0]
+[13.593835755987348, 11.774385356374767, 9.99999999999821, 8.180843444616427, 6.432437963015419, 5.049803594788741, 3.163087569098021, 1.4412914756153015, 0.3898982782237166, -1.128021263483106, -2.2313524424261395, ...
+
+### Excel Export
+The app exports the data to an Excel file, and creates charts by filtering selected data columns via regex, so one chart can dynamically include channel columns by name pattern.
+![BCI Data](https://learningisliving.dk/wp-content/uploads/2024/12/bci-excel-data.png)
+### Excel Charts
+Each chart gets its own sheet in the Excel file, and the charts are named by the chart title.
+
+```Java
+ private static void configureCharts() {
+
+        String[] titles = {"Frontal", "Central", "Occipital", "Gyro"};
+        chartDescriptors = new ArrayList<>();
+        chartDescriptors.add( new ChartDescriptor(titles[0], List.of("(?i)^F.*$"), false, titles[0], SAMPLE_TITLE, VALUE_TITLE, MarkerStyle.DOT));
+        chartDescriptors.add( new ChartDescriptor(titles[1], List.of("(?i)^C.*$"), false, titles[1], SAMPLE_TITLE, VALUE_TITLE, MarkerStyle.DOT));
+        chartDescriptors.add( new ChartDescriptor(titles[2], List.of("(?i)^O.*$", "(?i)^PO.*$", "(?i)^Pz.*$"), false, titles[2], SAMPLE_TITLE, VALUE_TITLE, MarkerStyle.DOT));
+        chartDescriptors.add( new ChartDescriptor(titles[3], List.of("(?i)^Gyro.*$"), false, titles[3], SAMPLE_TITLE, VALUE_TITLE, MarkerStyle.DOT));
+    }
+```
+Example chart:
 ![BCIVisualizer](https://learningisliving.dk/wp-content/uploads/2024/12/bci-excel-chart.png)
 
 ### Dependencies
