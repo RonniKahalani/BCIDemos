@@ -1,6 +1,8 @@
 package org.example.bci.visualizer;
 
 import brainflow.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -11,9 +13,10 @@ import java.util.List;
  */
 public class DataExtractor {
 
-    final static int BUFFER_SIZE = 1024;
+    final static int BUFFER_SIZE = 30;
     final static int SAMPLE_COUNT = BUFFER_SIZE;
     final static long WAIT_MILLIS = 5000;
+    private static final Logger log = LogManager.getLogger(DataExtractor.class);
 
     private final HashMap<String, String> dataDescriptions = new HashMap<>();
     private String[] dataLabels = null;
@@ -322,7 +325,16 @@ public class DataExtractor {
      * @throws BrainFlowError
      */
     private void extractOxygenLevel(double[] ppgIr, double[] ppgRed,int samplingRate) throws BrainFlowError {
-        oxygenLevel = DataFilter.get_oxygen_level(ppgIr, ppgRed, samplingRate);
+
+        try {
+            oxygenLevel = DataFilter.get_oxygen_level(ppgIr, ppgRed, samplingRate);
+        } catch (BrainFlowError e) {
+            if(BUFFER_SIZE < 1024) {
+                log.error("Buffer size is less than 1024, oxygen level might be inaccurate. Try setting buffer size to 1024.");
+            } else {
+                log.error("e: ", e);
+            }
+        }
     }
 
     /**
@@ -335,7 +347,16 @@ public class DataExtractor {
      * @throws BrainFlowError
      */
     private void extractHeartRate(double[] ppgIr, double[] ppgRed, int samplingRate, int fftSize) throws BrainFlowError {
-        heartRate = DataFilter.get_heart_rate(ppgIr, ppgRed, samplingRate, fftSize);
+
+        try {
+            heartRate = DataFilter.get_heart_rate(ppgIr, ppgRed, samplingRate, fftSize);
+        } catch (BrainFlowError e) {
+            if(BUFFER_SIZE < 1024) {
+                log.error("Buffer size is less than 1024, heart rate might be inaccurate. Try setting buffer size to 1024.");
+            } else {
+                log.error("e: ", e);
+            }
+        }
     }
 
     /**
