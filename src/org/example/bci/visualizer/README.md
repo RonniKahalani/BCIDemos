@@ -60,13 +60,17 @@ Export data and charts to an Excel file.
 [ParamParser.java](src/org/example/bci/visualizer/ParamParser.java)
 Parses the command line parameters.
 
-## Get it running
-- Fork or clone the app code.
-- Download, unzip and configure the BrainFlowJars.zip to be an external library in your IDE (developer tool/platform).
+## Get it up and running
+- Fork or clone this project app code.
+- Download, unzip and configure the [dependency BrainFlowJars.zip](./#dependency) in your IDE.
+- Start the app by running the main method in BCIVisualizer.java, with its default settings, using the synthetic board.
 
-### Starting the app
-Start the app by running the main method in BCIVisualizer.java, with its default settings, using the synthetic board.
-
+### Data Streaming
+Data is read as a two-dimensional array.
+```Java
+double data[ channelIndex ][ sampleIndex ];
+```
+And the channel definitions/metadata are in the configuration dump listed above.
 ### Configuration Dump
 The first thing you'll see, is a configuration dump from the board:
 
@@ -108,16 +112,3 @@ Marker channel: 31
 Timestamp channel: 30
 
 Package num channel: 0
-
-### Data Streaming
-Waiting for data...which is read as a two-dimensional double data[Channel][Data sample] array. And the channel definitions/metadata are in the configuration dump listed above.
-
-Yes data is here:
-[198.0, 199.0, 200.0, 201.0, 202.0, 203.0, 204.0, 205.0, 206.0, 207.0, 208.0, 209.0, 210.0, 211.0, 212.0, 213.0, 214.0, 215.0, 216.0, 217.0, 218.0, 219.0, 220.0, 221.0, 222.0, 223.0, 224.0, 225.0, 226.0, 227.0]
-[13.593835755987348, 11.774385356374767, 9.99999999999821, 8.180843444616427, 6.432437963015419, 5.049803594788741, 3.163087569098021, 1.4412914756153015, 0.3898982782237166, -1.128021263483106, -2.2313524424261395, ...
-
-This solution is developed in IntelliJ 2023.1.1 (Ultimate Edition).
-
-## Developed by
-Ronni Kahalani 2024.
-
