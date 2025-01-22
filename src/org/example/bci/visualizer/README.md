@@ -31,9 +31,9 @@ A chart can filter on multiple regular expressions.
 
 Here are some chart screenshots of the other sheets.
 
-![Frontal](doc/BCIVizualizer-sheets-1.png)
-![Central](doc/BCIVizualizer-sheets-2.png)
-![Occipital](doc/BCIVizualizer-sheets-3.png)
+![Frontal](/doc/BCIVizualizer-sheets-1.png)
+![Central](/doc/BCIVizualizer-sheets-2.png)
+![Occipital](/doc/BCIVizualizer-sheets-3.png)
 
 ### Dependencies
 The code depends up on different jar files that can be found here [BrainFlowJars.zip](https://drive.google.com/file/d/124RQcCQjArB9xW4oa_1Qri9ljCv8JVuO/view?usp=drive_link), and related as external libraries.
