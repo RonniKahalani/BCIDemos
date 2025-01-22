@@ -36,29 +36,10 @@ Here are some chart screenshots of the other sheets.
 ![Occipital](/doc/BCIVizualizer-sheets-3.png)
 
 ### Dependencies
-The code depends up on different jar files that can be found here [BrainFlowJars.zip](https://drive.google.com/file/d/124RQcCQjArB9xW4oa_1Qri9ljCv8JVuO/view?usp=drive_link), and related as external libraries.
+This app code depends up on different jar libraries/files found here [BrainFlowJars.zip](https://drive.google.com/file/d/124RQcCQjArB9xW4oa_1Qri9ljCv8JVuO/view?usp=drive_link).
 
-This ZIP file contains all the jar files for BrainFlow and Excel integration APIs to execute the demo.
-Unzip the file and reference it, as the BrainFlowJars library folder, in your development IDE.
-
-## Classes
-[BCIVisualizer.java](src/org/example/bci/visualizer/BCIVisualizer.java)
-The main entrypoint. 
-- Gets BCI data from a DataExtractor.
-- Define the charts to be created.
-- Exports Excel data and channel filtered charts.
-
-[ChartDescriptor.java](src/org/example/bci/visualizer/ChartDescriptor.java)
-Describes a chart to be created.
-
-[DataExtractor.java](src/org/example/bci/visualizer/DataExtractor.java)
-Extracts data from a BCI device.
-
-[ExcelExporter.java](src/org/example/bci/visualizer/ExcelExporter.java)
-Export data and charts to an Excel file.
-
-[ParamParser.java](src/org/example/bci/visualizer/ParamParser.java)
-Parses the command line parameters.
+This ZIP file contains all the jar files for BrainFlow, Excel integration and other APIs to execute the demo.
+Unzip the file and reference it, as the BrainFlowJars library folder, in your cloned/forked development IDE project.
 
 ## Get it up and running
 - Fork or clone this project app code.
@@ -112,3 +93,22 @@ Marker channel: 31
 Timestamp channel: 30
 
 Package num channel: 0
+
+## Classes
+[BCIVisualizer.java](src/org/example/bci/visualizer/BCIVisualizer.java)
+The main entrypoint. 
+- Gets BCI data from a DataExtractor.
+- Define the charts to be created.
+- Exports Excel data and channel filtered charts.
+
+[ChartDescriptor.java](src/org/example/bci/visualizer/ChartDescriptor.java)
+Describes a chart to be created.
+
+[DataExtractor.java](src/org/example/bci/visualizer/DataExtractor.java)
+Extracts data from a BCI device.
+
+[ExcelExporter.java](src/org/example/bci/visualizer/ExcelExporter.java)
+Export data and charts to an Excel file.
+
+[ParamParser.java](src/org/example/bci/visualizer/ParamParser.java)
+Parses the command line parameters.
