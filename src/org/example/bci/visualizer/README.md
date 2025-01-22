@@ -62,7 +62,7 @@ Parses the command line parameters.
 
 ## Get it up and running
 - Fork or clone this project app code.
-- Download, unzip and configure the [dependency BrainFlowJars.zip](./#dependency) in your IDE.
+- Download, unzip and configure the [dependency BrainFlowJars.zip](#dependencies) in your IDE.
 - Start the app by running the main method in BCIVisualizer.java, with its default settings, using the synthetic board.
 
 ### Data Streaming
@@ -70,7 +70,7 @@ Data is read as a two-dimensional array.
 ```Java
 double data[ channelIndex ][ sampleIndex ];
 ```
-And the channel definitions/metadata are in the configuration dump listed above.
+
 ### Configuration Dump
 The first thing you'll see, is a configuration dump from the board:
 
