@@ -1,13 +1,14 @@
 # BCIVisualizer
 This app visualizes EEG data from a Brain-Computer Interface (BCI) device.
 - Uses BrainFlow Java API to extract data from a standard BCI device.
-- Exports data to a MS Excel spreadsheet and creates charts by filtering selected data columns.
-- Uses Apache POI library to create Excel files and charts.
+- Exports BCI data to Excel spreadsheets.
+- Creates charts by filtering selected channel data columns.
+- Uses Apache POI to manage the Excel integration.
 
 ### Data Sheet
 All channel sample data is imported to the first sheet, in a new Excel file.
-Each column is a specific channel (place on the brain, and some control data columns) and all its rows are data samples over time.
-The number of rows is configuable in the app.
+Each column is a specific channel (sencor spot on the head/body, or some control data column) and all its rows are data samples over time.
+The requsted/used number of samples/rows is configuable in the app.
 
 ![Data Sheet](/doc/BCIVizualizer-data.png) 
 
