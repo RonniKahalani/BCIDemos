@@ -30,6 +30,7 @@ A chart can filter on multiple regular expressions.
     }
 ```
 
+### Example Charts
 Here are some chart screenshots of the other sheets.
 
 ![Frontal](/doc/BCIVizualizer-sheets-1.png)
