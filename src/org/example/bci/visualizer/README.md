@@ -7,7 +7,7 @@ This app visualizes EEG data from a Brain-Computer Interface (BCI) device.
 
 ### Data Sheet
 All channel sample data is imported to the first sheet, in a new Excel file.
-Each column is a specific channel (sencor spot on the head/body, or some control data column) and all its rows are data samples over time.
+Each column is a specific channel (sensor spot on the head/body, or some control data column) and all its rows are data samples over time.
 The requsted/used number of samples/rows is configuable in the app.
 
 ![Data Sheet](/doc/BCIVizualizer-data.png) 
