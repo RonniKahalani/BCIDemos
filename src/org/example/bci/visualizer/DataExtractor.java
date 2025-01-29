@@ -13,7 +13,8 @@ import java.util.List;
  */
 public class DataExtractor {
 
-    final static int BUFFER_SIZE = 30;
+    // This buffer size should be at least 1000, to enable more advanced features and accurate oxygen level and heart rate.
+    final static int BUFFER_SIZE = 1000;
     final static int SAMPLE_COUNT = BUFFER_SIZE;
     final static long WAIT_MILLIS = 5000;
     private static final Logger log = LogManager.getLogger(DataExtractor.class);
