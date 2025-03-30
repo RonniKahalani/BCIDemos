@@ -97,7 +97,7 @@ Timestamp channel: 30
 Package num channel: 0
 
 ## Classes
-[BCIVisualizer.java](src/org/example/bci/visualizer/BCIVisualizer.java)
+[BCIVisualizer.java](BCIVisualizer.java)
 The main entrypoint. 
 - Gets BCI data from a DataExtractor.
 - Define the charts to be created.
