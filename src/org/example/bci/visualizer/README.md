@@ -103,14 +103,14 @@ The main entrypoint.
 - Define the charts to be created.
 - Exports Excel data and channel filtered charts.
 
-[ChartDescriptor.java](src/org/example/bci/visualizer/ChartDescriptor.java)
+[ChartDescriptor.java](ChartDescriptor.java)
 Describes a chart to be created.
 
-[DataExtractor.java](src/org/example/bci/visualizer/DataExtractor.java)
+[DataExtractor.java](DataExtractor.java)
 Extracts data from a BCI device.
 
-[ExcelExporter.java](src/org/example/bci/visualizer/ExcelExporter.java)
+[ExcelExporter.java](ExcelExporter.java)
 Export data and charts to an Excel file.
 
-[ParamParser.java](src/org/example/bci/visualizer/ParamParser.java)
+[ParamParser.java](ParamParser.java)
 Parses the command line parameters.
