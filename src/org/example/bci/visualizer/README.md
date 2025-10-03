@@ -45,7 +45,7 @@ Unzip the file and reference it, as the BrainFlowJars library folder, in your cl
 
 ## Get it up and running
 - Fork or clone this project app code.
-- Download, unzip and configure the [dependency BrainFlowJars.zip](#dependencies) in your IDE.
+- Download, unzip and configure the above-mentioned dependency: BrainFlowJars.zip, in your IDE.
 - Start the app by running the main method in BCIVisualizer.java, with its default settings, using the synthetic board.
 
 ### Data Streaming
