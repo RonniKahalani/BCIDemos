@@ -1,6 +1,8 @@
 package org.example.bci.visualizer.experimental;
 
 import brainflow.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
 import java.awt.*;
@@ -13,6 +15,7 @@ import java.util.Arrays;
  * streams EEG data, and visualizes it in real-time.
  */
 public class BCIViewer extends JFrame implements AutoCloseable {
+    private static final Logger logger = LogManager.getLogger(BCIViewer.class);
     private static final int BOARD_ID = BoardIds.SYNTHETIC_BOARD.get_code(); // Change to your board ID
     private static final int EEG_CHANNEL = 3; // First EEG channel (1-indexed)
     private static final int BUFFER_SIZE = 250; // ~1 second at 250Hz
@@ -22,23 +25,55 @@ public class BCIViewer extends JFrame implements AutoCloseable {
     private volatile boolean isStreaming = false;
     private final double[] eegBuffer = new double[BUFFER_SIZE];
     private int bufferIndex = 0;
-    private final JPanel chartPanel;
-    private final JButton startButton;
-    private final JButton stopButton;
-    private final JLabel statusLabel;
+    private JPanel chartPanel;
+    private JButton startButton;
+    private JButton stopButton;
+    private JLabel statusLabel;
+    private JList<String> channelList;
+    private int selectedChannel = 0;
 
     /**
      * Constructor to set up the GUI and BrainFlow session.
      */
     public BCIViewer() throws BrainFlowError {
+        createUI();
+    }
+
+    /**
+     * Initializes the UI components.
+     */
+    private void createUI() throws BrainFlowError {
+
+        logger.info("Starting BCI Viewer");
+
+        // UI is created in the constructor
         setTitle("BrainFlow BCI Data Viewer");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
-        setSize(800, 600);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
+
 
         // Status label
         statusLabel = new JLabel("Disconnected", SwingConstants.CENTER);
         add(statusLabel, BorderLayout.NORTH);
+
+        // Channel list
+        channelList = new JList<>(new String[]{"Channel 1", "Channel 2", "Channel 3", "Channel 4", "Channel 5", "Channel 6", "Channel 7", "Channel 8"});
+        channelList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        channelList.setSelectedIndex(EEG_CHANNEL - 1);
+        add(new JScrollPane(channelList), BorderLayout.WEST);
+        channelList.addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                selectedChannel = channelList.getSelectedIndex();
+                if (selectedChannel != -1) {
+                    // Update EEG channel (1-indexed)
+                    // Note: In a real application, you would need to handle this change properly
+                    // For simplicity, we just log it here
+                    logger.info("Selected channel: " + (selectedChannel + 1));
+                }
+            }
+        });
+        add(new JScrollPane(channelList), BorderLayout.WEST);
 
         // Control buttons
         JPanel buttonPanel = new JPanel();
@@ -69,7 +104,7 @@ public class BCIViewer extends JFrame implements AutoCloseable {
             statusLabel.setText("Session prepared. Click Start to begin streaming.");
         } catch (BrainFlowError | IOException | ReflectiveOperationException e) {
             statusLabel.setText("Error preparing session: " + e.getMessage());
-            e.printStackTrace();
+            logger.fatal(e);
         }
 
         setVisible(true);
@@ -93,7 +128,7 @@ public class BCIViewer extends JFrame implements AutoCloseable {
                         try {
                             if (boardShim.get_board_data_count() > 0) {
                                 double[][] data = boardShim.get_board_data(1); // Get latest packet
-                                double eegValue = data[EEG_CHANNEL - 1][0]; // 0-indexed in array
+                                double eegValue = data[EEG_CHANNEL - 1 + selectedChannel][0]; // 0-indexed in array
 
                                 // Update buffer (circular)
                                 synchronized (this) {
@@ -105,15 +140,15 @@ public class BCIViewer extends JFrame implements AutoCloseable {
                                 SwingUtilities.invokeLater(chartPanel::repaint);
                             }
                             Thread.sleep(UPDATE_INTERVAL_MS);
-                        } catch (BrainFlowError | InterruptedException ex) {
-                            ex.printStackTrace();
+                        } catch (BrainFlowError | InterruptedException e) {
+                            logger.fatal(e);
                             stopStreaming();
                         }
                     }
                 }).start();
             } catch (BrainFlowError e) {
                 statusLabel.setText("Error starting stream: " + e.getMessage());
-                e.printStackTrace();
+                logger.fatal(e);
             }
         }
     }
@@ -128,7 +163,7 @@ public class BCIViewer extends JFrame implements AutoCloseable {
                 boardShim.stop_stream();
                 statusLabel.setText("Stream stopped.");
             } catch (BrainFlowError e) {
-                e.printStackTrace();
+                logger.fatal(e);
             }
             startButton.setEnabled(true);
             stopButton.setEnabled(false);
@@ -140,7 +175,7 @@ public class BCIViewer extends JFrame implements AutoCloseable {
      * Cleans up the BrainFlow session.
      */
     @Override
-    public void close() throws Exception {
+    public void close() {
         if (boardShim != null) {
             try {
                 if (isStreaming) {
@@ -173,8 +208,8 @@ public class BCIViewer extends JFrame implements AutoCloseable {
             g2d.setColor(Color.WHITE);
             g2d.fillRect(0, 0, getWidth(), getHeight());
 
-            int height = getHeight();
-            int width = getWidth();
+            int height;
+            int width;
 
             // Draw EEG data
             synchronized (BCIViewer.this) {
@@ -199,9 +234,12 @@ public class BCIViewer extends JFrame implements AutoCloseable {
 
                 g2d.setColor(Color.BLUE);
                 for (int i = 0; i < visiblePoints - 1; i++) {
-                    double y1 = height / 2 - ((displayBuffer[i] - min) / range * height * 0.8);
-                    double y2 = height / 2 - ((displayBuffer[i + 1] - min) / range * height * 0.8);
-                    g2d.draw(new Line2D.Double(i * pointWidth, y1, (i + 1) * pointWidth, y2));
+                    double y1 = (double) height / 2 - ((displayBuffer[i] - min) / range * height * 0.8);
+                    double y2 = (double) height / 2 - ((displayBuffer[i + 1] - min) / range * height * 0.8);
+                    double x1 = i * pointWidth;
+                    double x2 = (i + 1) * pointWidth;
+                    g2d.draw(new Line2D.Double(x1, y1, x2, y2));
+                    statusLabel.setText("coords: (" + x1 + ", " + y1 + ")(" + x2 + ", " + y2 + ")");
                 }
             }
 
@@ -224,14 +262,11 @@ public class BCIViewer extends JFrame implements AutoCloseable {
      * Main entry point.
      */
     public static void main(String[] args) throws BrainFlowError {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    new BCIViewer();
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
+        SwingUtilities.invokeLater(() -> {
+            try {
+                new BCIViewer();
+            } catch (BrainFlowError e) {
+                throw new RuntimeException(e);
             }
         });
     }

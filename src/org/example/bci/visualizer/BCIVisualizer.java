@@ -2,6 +2,8 @@ package org.example.bci.visualizer;
 
 import brainflow.BoardIds;
 import brainflow.BrainFlowInputParams;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.poi.xddf.usermodel.chart.MarkerStyle;
 
 import java.text.SimpleDateFormat;
@@ -12,6 +14,7 @@ import java.util.List;
  * Visualizes a BCI data extract into an Excel file.
  */
 public class BCIVisualizer {
+    private static final Logger logger = LogManager.getLogger(BCIVisualizer.class);
 
     final static String SAMPLE_TITLE = "Sample";
     final static String VALUE_TITLE = "Value";
@@ -27,6 +30,9 @@ public class BCIVisualizer {
      */
     public static void main(String[] args) throws Exception {
 
+        logger.info("Starting BCI Visualizer");
+
+        // Parse the command line parameters.
         BrainFlowInputParams params = new BrainFlowInputParams();
         int boardId = ParamParser.parseParams(args, params);
 
