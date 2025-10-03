@@ -1,4 +1,4 @@
-package org.example.bci.visualizer;
+package org.example.bci.visualizer.experimental;
 
 import brainflow.*;
 
