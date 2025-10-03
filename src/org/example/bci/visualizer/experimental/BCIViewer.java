@@ -8,6 +8,10 @@ import java.awt.geom.Line2D;
 import java.io.IOException;
 import java.util.Arrays;
 
+/**
+ * A simple Java Swing application that connects to a BrainFlow-compatible BCI device,
+ * streams EEG data, and visualizes it in real-time.
+ */
 public class BCIViewer extends JFrame implements AutoCloseable {
     private static final int BOARD_ID = BoardIds.SYNTHETIC_BOARD.get_code(); // Change to your board ID
     private static final int EEG_CHANNEL = 3; // First EEG channel (1-indexed)

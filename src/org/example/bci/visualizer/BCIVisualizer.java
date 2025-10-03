@@ -22,8 +22,8 @@ public class BCIVisualizer {
     /**
      * Main entry point.
      *
-     * @param args
-     * @throws Exception
+     * @param args to the main program entry point.
+     * @throws Exception from the BrainFlow API or Excel export.
      */
     public static void main(String[] args) throws Exception {
 
@@ -41,7 +41,7 @@ public class BCIVisualizer {
     /**
      * Extracts the data from the device.
      *
-     * @throws Exception
+     * @throws Exception from the BrainFlow API.
      */
     private static void extractData(int boardId, BrainFlowInputParams params) throws Exception {
         dataExtractor = new DataExtractor(boardId, params, DataExtractor.BUFFER_SIZE, DataExtractor.WAIT_MILLIS, DataExtractor.SAMPLE_COUNT);
@@ -64,7 +64,7 @@ public class BCIVisualizer {
     /**
      * Exports the Excel file.
      *
-     * @throws Exception
+     * @throws Exception from the Excel export.
      */
     private static void exportExcelFile() throws Exception {
         String fileName = "BrainFlow-" + BoardIds.from_code(dataExtractor.getBoardId()) + "-" + new SimpleDateFormat("yyyyMMddHHmm'.xlsx'").format(new Date());
