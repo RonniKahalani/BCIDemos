@@ -6,10 +6,17 @@ import brainflow.BrainFlowInputParams;
  * Parses the command line parameters.
  */
 public class ParamParser {
+    /**
+     * Parses the command line parameters.
+     *
+     * @param args   command line arguments.
+     * @param params BrainFlowInputParams to populate.
+     * @return the board ID.
+     */
     public static int parseParams(String[] args, BrainFlowInputParams params) {
         int boardId = -1;
 
-        for(int i = 0; i < args.length; ++i) {
+        for (int i = 0; i < args.length; ++i) {
             String argId = args[i];
             String argValue = args[i + 1];
 

@@ -27,6 +27,9 @@ public class BCIViewer extends JFrame implements AutoCloseable {
     private final JButton stopButton;
     private final JLabel statusLabel;
 
+    /**
+     * Constructor to set up the GUI and BrainFlow session.
+     */
     public BCIViewer() throws BrainFlowError {
         setTitle("BrainFlow BCI Data Viewer");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -72,6 +75,9 @@ public class BCIViewer extends JFrame implements AutoCloseable {
         setVisible(true);
     }
 
+    /**
+     * Starts the data streaming and visualization.
+     */
     private void startStreaming() {
         if (!isStreaming) {
             try {
@@ -112,6 +118,9 @@ public class BCIViewer extends JFrame implements AutoCloseable {
         }
     }
 
+    /**
+     * Stops the data streaming and visualization.
+     */
     private void stopStreaming() {
         if (isStreaming) {
             isStreaming = false;
@@ -127,6 +136,9 @@ public class BCIViewer extends JFrame implements AutoCloseable {
         }
     }
 
+    /**
+     * Cleans up the BrainFlow session.
+     */
     @Override
     public void close() throws Exception {
         if (boardShim != null) {
@@ -144,9 +156,14 @@ public class BCIViewer extends JFrame implements AutoCloseable {
         }
     }
 
-    // Inner class for the chart panel
+    /**
+     * Custom JPanel to draw the EEG data.
+     */
     class ChartPanel extends JPanel {
 
+        /**
+         * Paints the EEG data on the panel.
+         */
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
@@ -159,6 +176,7 @@ public class BCIViewer extends JFrame implements AutoCloseable {
             int height = getHeight();
             int width = getWidth();
 
+            // Draw EEG data
             synchronized (BCIViewer.this) {
                 if (bufferIndex == 0) return; // No data yet
 
@@ -193,12 +211,18 @@ public class BCIViewer extends JFrame implements AutoCloseable {
             g2d.drawString("Time →", width - 50, height - 10);
         }
 
+        /**
+         * Preferred size of the chart panel.
+         */
         @Override
         public Dimension getPreferredSize() {
             return new Dimension(800, 400);
         }
     }
 
+    /**
+     * Main entry point.
+     */
     public static void main(String[] args) throws BrainFlowError {
         SwingUtilities.invokeLater(new Runnable() {
             @Override

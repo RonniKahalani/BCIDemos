@@ -3,10 +3,11 @@ package org.example.bci.visualizer;
 import brainflow.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.example.bci.visualizer.properties.PropertyLoader;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Extracts data from a BCI device.
@@ -19,7 +20,7 @@ public class DataExtractor {
     final static long WAIT_MILLIS = 5000;
     private static final Logger log = LogManager.getLogger(DataExtractor.class);
 
-    private final HashMap<String, String> dataDescriptions = new HashMap<>();
+    private Map<String, String> dataDescriptions;
     private String[] dataLabels = null;
     private double[][] data = null;
     private BoardDescr boardDescr;
@@ -27,26 +28,21 @@ public class DataExtractor {
     private int boardId;
 
     private int bufferSize;
-
     private long waitMillis;
-
     private int sampleCount;
-
     private int samplingRate;
-
     private double oxygenLevel;
-
     private double heartRate;
 
     /**
      * Constructor for a given board device, params, buffer size, wait time and sample count.
      *
-     * @param boardId
-     * @param params
-     * @param bufferSize
-     * @param waitMillis
-     * @param sampleCount
-     * @throws BrainFlowError
+     * @param boardId     the board id.
+     * @param params      the BrainFlowInputParams.
+     * @param bufferSize  in samples.
+     * @param waitMillis  in millis.
+     * @param sampleCount number of samples to extract.
+     * @throws BrainFlowError from the BrainFlow API.
      */
     public DataExtractor(int boardId, BrainFlowInputParams params, int bufferSize, long waitMillis, int sampleCount) throws BrainFlowError {
 
@@ -61,10 +57,20 @@ public class DataExtractor {
         initializeDataLabels();
     }
 
+    /**
+     * Sets the sampling rate.
+     *
+     * @param samplingRate in Hz.
+     */
     public void setSamplingRate(int samplingRate) {
         this.samplingRate = samplingRate;
     }
 
+    /**
+     * Returns the sampling rate.
+     *
+     * @return sampling rate in Hz.
+     */
     public int getSamplingRate() {
         return samplingRate;
     }
@@ -81,7 +87,7 @@ public class DataExtractor {
     /**
      * Sets the buffer size.
      *
-     * @param bufferSize
+     * @param bufferSize in samples.
      */
     public void setBufferSize(int bufferSize) {
         this.bufferSize = bufferSize;
@@ -99,9 +105,11 @@ public class DataExtractor {
     /**
      * Sets the wait time in millis.
      *
-     * @param waitMillis
+     * @param waitMillis in millis.
      */
-    public void setWaitMillis(long waitMillis) { this.waitMillis = waitMillis;}
+    public void setWaitMillis(long waitMillis) {
+        this.waitMillis = waitMillis;
+    }
 
     /**
      * Returns the sample count.
@@ -115,7 +123,7 @@ public class DataExtractor {
     /**
      * Sets the sample count.
      *
-     * @param sampleCount
+     * @param sampleCount number of samples.
      */
     public void setSampleCount(int sampleCount) {
         this.sampleCount = sampleCount;
@@ -125,24 +133,7 @@ public class DataExtractor {
      * Initializes the data labels.
      */
     private void initializeDataLabels() {
-
-        dataDescriptions.put("Fz", "Frontal midline");
-        dataDescriptions.put("C3", "Central left side");
-        dataDescriptions.put("Cz", "Central midline");
-        dataDescriptions.put("C4", "Central right side");
-        dataDescriptions.put("Pz", "Parietal midline");
-        dataDescriptions.put("PO7", "Parieto-Occipital left side");
-        dataDescriptions.put("Oz", "Occipital midline");
-        dataDescriptions.put("PO8", "Parieto-Occipital right side");
-        dataDescriptions.put("F1", "Frontal coronal outer left midline");
-        dataDescriptions.put("F2", "Frontal coronal left midline");
-        dataDescriptions.put("F3", "Frontal coronal right midline");
-        dataDescriptions.put("F4", "Frontal coronal outer right midline");
-        dataDescriptions.put("F5", "Frontal lateral level 3");
-        dataDescriptions.put("F6", "Frontal lateral level 3");
-        dataDescriptions.put("F7", "Frontal left near temple");
-        dataDescriptions.put("F8", "Frontal right near temple");
-
+        dataDescriptions = PropertyLoader.get("data-labels.properties");
         dataLabels = new String[boardDescr.num_rows];
 
         int nameIndex = 0;
@@ -150,16 +141,17 @@ public class DataExtractor {
         for (int row : boardDescr.eeg_channels) {
             String channelName = eegNames[nameIndex++];
             String eegTitle = dataDescriptions.get(channelName);
-            String fullName = eegTitle == null ? channelName : channelName + " - " +eegTitle;
-            String value = fullName + " eeg";
+            String fullName = eegTitle == null ? channelName : channelName + " - " + eegTitle;
+            StringBuilder value = new StringBuilder(fullName + " eeg");
+
             if (boardDescr.eog_channels.contains(row)) {
-                value += "/eog";
+                value.append("/eog");
             }
             if (boardDescr.emg_channels.contains(row)) {
-                value += "/emg";
+                value.append("/emg");
             }
 
-            dataLabels[row] = value;
+            dataLabels[row] = value.toString();
         }
 
         createDataLabels(boardDescr.accel_channels, "Accel");
@@ -194,7 +186,7 @@ public class DataExtractor {
      *
      * @return data descriptions.
      */
-    public HashMap<String,String> getDataDescriptions() {
+    public Map<String, String> getDataDescriptions() {
         return dataDescriptions;
     }
 
@@ -237,7 +229,7 @@ public class DataExtractor {
     /**
      * Sets the params.
      *
-     * @param params
+     * @param params the BrainFlowInputParams.
      */
     public void setParams(BrainFlowInputParams params) {
         this.params = params;
@@ -245,6 +237,7 @@ public class DataExtractor {
 
     /**
      * Returns the board id.
+     *
      * @return boardId.
      */
     public int getBoardId() {
@@ -254,7 +247,7 @@ public class DataExtractor {
     /**
      * Sets the board id.
      *
-     * @param boardId
+     * @param boardId the board id.
      */
     public void setBoardId(int boardId) {
         this.boardId = boardId;
@@ -263,18 +256,18 @@ public class DataExtractor {
     /**
      * Extracts a specific number of data samples.
      *
-     * @param sampleCount
-     * @throws Exception
+     * @param sampleCount number of samples to extract.
+     * @throws Exception from the BrainFlow API.
      */
     public void extractData(int sampleCount) throws Exception {
-        this.sampleCount = sampleCount;
+        setSampleCount(sampleCount);
         extractData();
     }
 
     /**
      * Extracts data, based on the internal sample count.
      *
-     * @throws Exception
+     * @throws Exception from the BrainFlow API.
      */
     public void extractData() throws Exception {
         BoardShim.enable_board_logger();
@@ -303,7 +296,7 @@ public class DataExtractor {
     /**
      * Extracts different PPG values.
      *
-     * @throws BrainFlowError
+     * @throws BrainFlowError from the BrainFlow API.
      */
     private void extractPPGValues() throws BrainFlowError {
         int[] ppgChannels = BoardShim.get_ppg_channels(boardId);
@@ -320,17 +313,16 @@ public class DataExtractor {
     /**
      * Extracts the oxygen level from the data.
      *
-     * @param ppgIr
-     * @param ppgRed
-     * @param samplingRate
-     * @throws BrainFlowError
+     * @param ppgIr        photoplethysmography infrared data.
+     * @param ppgRed       photoplethysmography red data.
+     * @param samplingRate in Hz.
      */
-    private void extractOxygenLevel(double[] ppgIr, double[] ppgRed,int samplingRate) throws BrainFlowError {
+    private void extractOxygenLevel(double[] ppgIr, double[] ppgRed, int samplingRate) {
 
         try {
             oxygenLevel = DataFilter.get_oxygen_level(ppgIr, ppgRed, samplingRate);
         } catch (BrainFlowError e) {
-            if(BUFFER_SIZE < 1024) {
+            if (BUFFER_SIZE < 1024) {
                 log.error("Buffer size is less than 1024, oxygen level might be inaccurate. Try setting buffer size to 1024.");
             } else {
                 log.error("e: ", e);
@@ -341,18 +333,18 @@ public class DataExtractor {
     /**
      * Extracts the heart rate from the data.
      *
-     * @param ppgIr
-     * @param ppgRed
-     * @param samplingRate
-     * @param fftSize
-     * @throws BrainFlowError
+     * @param ppgIr        photoplethysmography infrared data.
+     * @param ppgRed       photoplethysmography red data.
+     * @param samplingRate in Hz.
+     * @param fftSize      FFT size, should be power of 2.
+     * @throws BrainFlowError from the BrainFlow API.
      */
     private void extractHeartRate(double[] ppgIr, double[] ppgRed, int samplingRate, int fftSize) throws BrainFlowError {
 
         try {
             heartRate = DataFilter.get_heart_rate(ppgIr, ppgRed, samplingRate, fftSize);
         } catch (BrainFlowError e) {
-            if(BUFFER_SIZE < 1024) {
+            if (BUFFER_SIZE < 1024) {
                 log.error("Buffer size is less than 1024, heart rate might be inaccurate. Try setting buffer size to 1024.");
             } else {
                 log.error("e: ", e);
@@ -363,13 +355,13 @@ public class DataExtractor {
     /**
      * Low pass signal filter.
      *
-     * @param dataChannel
-     * @param samplingRate
-     * @param cutOff
-     * @param order
-     * @param filterType
-     * @param ripple
-     * @throws BrainFlowError
+     * @param dataChannel  data channel to filter.
+     * @param samplingRate in Hz.
+     * @param cutOff       cut off-frequency in Hz.
+     * @param order        order of the filter.
+     * @param filterType   type of the filter.
+     * @param ripple       ripple for the filter.
+     * @throws BrainFlowError from the BrainFlow API.
      */
     public void filterLowPass(double[] dataChannel, int samplingRate, double cutOff, int order, FilterTypes filterType, double ripple) throws BrainFlowError {
         DataFilter.perform_lowpass(dataChannel, samplingRate, cutOff, order, filterType, ripple);
@@ -378,13 +370,13 @@ public class DataExtractor {
     /**
      * High pass signal filter.
      *
-     * @param dataChannel
-     * @param samplingRate
-     * @param cutOff
-     * @param order
-     * @param filterType
-     * @param ripple
-     * @throws BrainFlowError
+     * @param dataChannel  data channel to filter.
+     * @param samplingRate in Hz.
+     * @param cutOff       cut off frequency in Hz.
+     * @param order        order of the filter.
+     * @param filterType   type of the filter.
+     * @param ripple       ripple for the filter.
+     * @throws BrainFlowError from the BrainFlow API.
      */
     public void filterHighPass(double[] dataChannel, int samplingRate, double cutOff, int order, FilterTypes filterType, double ripple) throws BrainFlowError {
         DataFilter.perform_highpass(dataChannel, samplingRate, cutOff, order, filterType, ripple);
@@ -392,14 +384,15 @@ public class DataExtractor {
 
     /**
      * Bans pass signal filter.
-     * @param dataChannel
-     * @param samplingRate
-     * @param startFrequency
-     * @param stopFrequency
-     * @param order
-     * @param filterType
-     * @param ripple
-     * @throws BrainFlowError
+     *
+     * @param dataChannel    data channel to filter.
+     * @param samplingRate   in Hz.
+     * @param startFrequency the frequency to start the band pass filter.
+     * @param stopFrequency  the frequency to stop the band pass filter.
+     * @param order          order of the filter.
+     * @param filterType     type of the filter.
+     * @param ripple         ripple for the filter.
+     * @throws BrainFlowError from the BrainFlow API.
      */
     public void filterBandPass(double[] dataChannel, int samplingRate, double startFrequency, double stopFrequency, int order, FilterTypes filterType, double ripple) throws BrainFlowError {
         DataFilter.perform_bandpass(dataChannel, samplingRate, startFrequency, stopFrequency, order, filterType, ripple);
@@ -408,14 +401,14 @@ public class DataExtractor {
     /**
      * Bans stop signal filter.
      *
-     * @param dataChannel
-     * @param samplingRate
-     * @param startFrequency
-     * @param stopFrequency
-     * @param order
-     * @param filterType
-     * @param ripple
-     * @throws BrainFlowError
+     * @param dataChannel    data channel to filter.
+     * @param samplingRate   in Hz.
+     * @param startFrequency the frequency to start the band stop filter.
+     * @param stopFrequency  the frequency to stop the band stop filter.
+     * @param order          order of the filter.
+     * @param filterType     type of the filter.
+     * @param ripple         ripple for the filter.
+     * @throws BrainFlowError from the BrainFlow API.
      */
 
     public void filterBandStop(double[] dataChannel, int samplingRate, double startFrequency, double stopFrequency, int order, FilterTypes filterType, double ripple) throws BrainFlowError {
@@ -425,24 +418,23 @@ public class DataExtractor {
     /**
      * Remove environmental noise signal filter.
      *
-     * @param dataChannel
-     * @param samplingRate
-     * @param noiseType
-     * @throws BrainFlowError
+     * @param dataChannel  data channel to filter.
+     * @param samplingRate in Hz.
+     * @param noiseType    type of the noise to remove.
+     * @throws BrainFlowError from the BrainFlow API.
      */
     public void filterRemoveEnvironmentalNoise(double[] dataChannel, int samplingRate, NoiseTypes noiseType) throws BrainFlowError {
         DataFilter.remove_environmental_noise(dataChannel, samplingRate, noiseType);
     }
 
 
-
     /**
      * Downsamples data for a given period and operation.
      *
-     * @param dataChannel
-     * @param period
-     * @param operation
-     * @throws BrainFlowError
+     * @param dataChannel data channel to downsample.
+     * @param period      downsampling period.
+     * @param operation   aggregation operation.
+     * @throws BrainFlowError from the BrainFlow API.
      */
     public double[] downsample(double[] dataChannel, int period, AggOperations operation) throws BrainFlowError {
         return DataFilter.perform_downsampling(dataChannel, period, operation);
@@ -451,8 +443,8 @@ public class DataExtractor {
     /**
      * Creates data labels.
      *
-     * @param values
-     * @param labelPrefix
+     * @param values      list of channel indices.
+     * @param labelPrefix the label prefix.
      */
     public void createDataLabels(List<Integer> values, String labelPrefix) {
         if (values != null) {
@@ -468,7 +460,7 @@ public class DataExtractor {
     /**
      * Dumps a list of channels.
      *
-     * @param channels
+     * @param channels list of channels.
      * @return channels as string.
      */
     public String dumpChannels(List<Integer> channels) {
@@ -478,7 +470,7 @@ public class DataExtractor {
     /**
      * Dumps board descriptors.
      *
-     * @param boardDescr
+     * @param boardDescr the board descriptors.
      */
     public void dumpDescriptor(BoardDescr boardDescr) {
 
@@ -507,18 +499,38 @@ public class DataExtractor {
 
     }
 
+    /**
+     * Returns the oxygen level.
+     *
+     * @return oxygen level.
+     */
     public double getOxygenLevel() {
         return oxygenLevel;
     }
 
+    /**
+     * Sets the oxygen level.
+     *
+     * @param oxygenLevel oxygen level.
+     */
     public void setOxygenLevel(double oxygenLevel) {
         this.oxygenLevel = oxygenLevel;
     }
 
+    /**
+     * Returns the heart rate.
+     *
+     * @return heart rate.
+     */
     public double getHeartRate() {
         return heartRate;
     }
 
+    /**
+     * Sets the heart rate.
+     *
+     * @param heartRate heart rate.
+     */
     public void setHeartRate(double heartRate) {
         this.heartRate = heartRate;
     }
