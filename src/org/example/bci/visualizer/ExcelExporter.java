@@ -20,16 +20,16 @@ public final class ExcelExporter {
     /**
      * Creates a line chart.
      *
-     * @param dataSheet
-     * @param chartSheet
-     * @param chartTitle
-     * @param catAxisTitle
-     * @param yAxisTitle
-     * @param headers
-     * @param dataRange
-     * @param anchor
-     * @param columns
-     * @param chartType
+     * @param dataSheet where the data is located.
+     * @param chartSheet where to create the chart.
+     * @param chartTitle the title of the chart.
+     * @param catAxisTitle the category axis title.
+     * @param yAxisTitle the value axis title.
+     * @param headers the header cells.
+     * @param dataRange the range of the data.
+     * @param anchor the anchor for the chart.
+     * @param columns the columns to include in the chart.
+     * @param chartType the type of chart.
      */
     public void createLineChart(XSSFSheet dataSheet, XSSFSheet chartSheet, String chartTitle, String catAxisTitle, String yAxisTitle, XSSFCell[] headers, CellRangeAddress dataRange, XSSFClientAnchor anchor, List<Integer> columns, ChartTypes chartType, MarkerStyle markerStyle) {
 
@@ -78,8 +78,8 @@ public final class ExcelExporter {
     /**
      * Imports the data into an Excel sheet.
      *
-     * @param sheet
-     * @param dataExtractor
+     * @param sheet the sheet to import the data into.
+     * @param dataExtractor the data extractor to get the data from.
      */
     public void importData(SXSSFSheet sheet, DataExtractor dataExtractor) {
 
@@ -106,10 +106,10 @@ public final class ExcelExporter {
 
     /**
      * Generates the Excel file with charts.
-     * @param fileName
-     * @param dataExtractor
-     * @param chartDescriptors
-     * @throws Exception
+     * @param fileName the name of the file to create.
+     * @param dataExtractor the data extractor to get the data from.
+     * @param chartDescriptors the chart descriptors to create the charts.
+     * @throws Exception from the Excel export.
      */
     public void generateExcelFile(String fileName, DataExtractor dataExtractor, List<ChartDescriptor> chartDescriptors) throws Exception {
 
@@ -140,9 +140,9 @@ public final class ExcelExporter {
     /**
      * Creates header cells.
      *
-     * @param dataSheet
-     * @param dataLabels
-     * @return
+     * @param dataSheet the sheet to create the headers in.
+     * @param dataLabels the data labels to use as headers.
+     * @return the created header cells.
      */
     public XSSFCell[] createHeaders(XSSFSheet dataSheet, String[] dataLabels) {
         XSSFRow row = dataSheet.createRow(0);
@@ -163,9 +163,9 @@ public final class ExcelExporter {
 
     /**
      * Finds columns with matching header prefixes.
-     * @param labels
-     * @param prefixes
-     * @return
+     * @param labels the list of labels to search.
+     * @param prefixes the list of prefixes to match.
+     * @return the list of matching column indices.
      */
     public List<Integer> findMatchingLabelColumns(List<String> labels, List<String> prefixes) {
 
@@ -187,15 +187,15 @@ public final class ExcelExporter {
     /**
      * Creates a chart.
      *
-     * @param dataSheet
-     * @param chartSheet
-     * @param chartTitle
-     * @param catAxisTitle
-     * @param yAxisTitle
-     * @param headers
-     * @param columns
-     * @param numSamples
-     * @param chartType3D
+     * @param dataSheet the sheet where the data is located.
+     * @param chartSheet the sheet where to create the chart.
+     * @param chartTitle the title of the chart.
+     * @param catAxisTitle the category axis title.
+     * @param yAxisTitle the value axis title.
+     * @param headers the header cells.
+     * @param columns the columns to include in the chart.
+     * @param numSamples the number of samples in the data.
+     * @param chartType3D whether to create a 3D chart.
      */
     public void createChart(XSSFSheet dataSheet, XSSFSheet chartSheet, String chartTitle, String catAxisTitle, String yAxisTitle, XSSFCell[] headers, List<Integer> columns, int numSamples, boolean chartType3D, MarkerStyle markerStyle) {
 
