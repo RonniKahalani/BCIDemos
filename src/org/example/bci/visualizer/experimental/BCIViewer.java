@@ -108,6 +108,7 @@ public class BCIViewer extends JFrame implements AutoCloseable {
             logger.fatal(e);
         }
 
+        pack();
         setVisible(true);
     }
 
