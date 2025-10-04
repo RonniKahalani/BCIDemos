@@ -12,7 +12,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.Line2D;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -40,14 +42,14 @@ public class BCIViewer extends JFrame implements AutoCloseable {
     /**
      * Constructor to set up the GUI and BrainFlow session.
      */
-    public BCIViewer() throws BrainFlowError {
+    public BCIViewer() {
         createUI();
     }
 
     /**
      * Initializes the UI components.
      */
-    private void createUI() throws BrainFlowError {
+    private void createUI() {
 
         logger.info("Starting BCI Viewer");
 
@@ -58,56 +60,46 @@ public class BCIViewer extends JFrame implements AutoCloseable {
         setExtendedState(JFrame.MAXIMIZED_BOTH);
 
         JPanel northPanel = new JPanel(new BorderLayout());
-        // Status label
         statusLabel = new JLabel("Disconnected", SwingConstants.CENTER);
         northPanel.add(statusLabel, BorderLayout.WEST);
 
         // Channel selection
-        String[] channelValues = BoardShim.get_eeg_names(BOARD_ID);// Ensure channels are loaded
-        Map<String, String> eegMap = PropertyLoader.get("data-labels.properties");
-        for (int i = 0; i < channelValues.length; i++) {
-            if (eegMap.containsKey(channelValues[i])) {
-                String channelValue = channelValues[i];
-                channelValues[i] = eegMap.get(channelValue) + " (" + channelValue + ")";
-            }
+        java.util.List<String> eegComboBoxLabels = new ArrayList<>();
+        Map<String, String> eegLabelMap = PropertyLoader.get("data-labels.properties");
+        try {
+            java.util.List<String> eegNames = List.of(BoardShim.get_eeg_names(BOARD_ID));// Ensure channels are loaded
+
+            eegComboBoxLabels = eegNames.stream()
+                    .map(channelId -> eegLabelMap.containsKey(channelId) ? eegLabelMap.get(channelId) + " (" + channelId + ")" : channelId)
+                    .toList();
+        } catch (BrainFlowError e) {
+            statusLabel.setText("Error loading channels: " + e.getMessage());
+            logger.fatal(e);
         }
 
-        channelComboBox = new JComboBox<>(channelValues);
+        channelComboBox = new JComboBox<>(eegComboBoxLabels.toArray(new String[0]));
         channelComboBox.setEditable(false);
         channelComboBox.addActionListener(e -> selectedChannel = channelComboBox.getSelectedIndex());
         northPanel.add(channelComboBox, BorderLayout.EAST);
         add(northPanel, BorderLayout.NORTH);
 
         // Control buttons
-        JPanel southPanel = new JPanel();
-
-        JPanel buttonPanel = new JPanel();
-        startButton = new JButton("Start Streaming");
-        stopButton = new JButton("Stop Streaming");
-        stopButton.setEnabled(false);
-        buttonPanel.add(startButton);
-        buttonPanel.add(stopButton);
-
-        dataLabel = new JLabel("", SwingConstants.CENTER);
-        southPanel.add(dataLabel, BorderLayout.EAST);
-        southPanel.add(buttonPanel, BorderLayout.CENTER);
+        JPanel southPanel = new JPanel(new BorderLayout());
+        southPanel.add(createControlUI(), BorderLayout.CENTER);
+        southPanel.add(createDataUI(), BorderLayout.EAST);
         add(southPanel, BorderLayout.SOUTH);
 
         // Chart panel
         chartPanel = new ChartPanel();
         add(chartPanel, BorderLayout.CENTER);
 
-        // Action listeners
-        startButton.addActionListener(e -> startStreaming());
-        stopButton.addActionListener(e -> stopStreaming());
-
-        // Initialize BrainFlow
-        BoardShim.enable_dev_board_logger();
-        BrainFlowInputParams params = new BrainFlowInputParams();
-        // For real boards, set params.serial_port, params.mac_address, etc.
-        // e.g., params.serial_port = "/dev/ttyUSB0";
-
         try {
+            // Initialize BrainFlow
+            BoardShim.enable_dev_board_logger();
+            BrainFlowInputParams params = new BrainFlowInputParams();
+            // For real boards, set params.serial_port, params.mac_address, etc.
+            // e.g., params.serial_port = "/dev/ttyUSB0";
+
             boardShim = new BoardShim(BOARD_ID, params);
             boardShim.prepare_session();
             statusLabel.setText("Session prepared. Click Start to begin streaming.");
@@ -117,6 +109,38 @@ public class BCIViewer extends JFrame implements AutoCloseable {
         }
 
         setVisible(true);
+    }
+
+    /**
+     * Creates the data display UI.
+     *
+     * @return the data UI panel
+     */
+    private JPanel createDataUI() {
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        dataLabel = new JLabel("");
+        panel.add(dataLabel);
+        return panel;
+    }
+
+    /**
+     * Creates the control buttons UI.
+     *
+     * @return the control UI panel
+     */
+    private JPanel createControlUI() {
+        JPanel panel = new JPanel();
+        startButton = new JButton("Start Streaming");
+        stopButton = new JButton("Stop Streaming");
+        stopButton.setEnabled(false);
+        panel.add(startButton);
+        panel.add(stopButton);
+
+        // Action listeners
+        startButton.addActionListener(e -> startStreaming());
+        stopButton.addActionListener(e -> stopStreaming());
+
+        return panel;
     }
 
     /**
@@ -220,6 +244,7 @@ public class BCIViewer extends JFrame implements AutoCloseable {
             g2d.fillRect(0, 0, getWidth(), getHeight());
 
             int height;
+            int halfHeight;
             int width;
 
             // Draw EEG data
@@ -231,15 +256,15 @@ public class BCIViewer extends JFrame implements AutoCloseable {
                 System.arraycopy(eegBuffer, 0, displayBuffer, 0, visiblePoints);
 
                 dataLabel.setText(String.format("Latest EEG Value: %.2f μV", displayBuffer[visiblePoints - 1]));
+
+                height = getHeight() - 40;
+                halfHeight = height / 2;
+                width = getWidth();
+
                 // Scale data to fit panel (simple min-max scaling)
                 double min = Arrays.stream(displayBuffer).min().orElse(0);
                 double max = Arrays.stream(displayBuffer).max().orElse(0);
-                double range = max - min;
-                if (range == 0) range = 1; // Avoid division by zero
-
-                height = getHeight() - 40;
-                width = getWidth();
-                int halfHeight = height / 2;
+                double rangeHeightFactor = getRangeHeightFactor(min, max, height);
                 int pointWidth = width / (visiblePoints - 1);
 
                 g2d.setColor(Color.BLACK);
@@ -247,22 +272,34 @@ public class BCIViewer extends JFrame implements AutoCloseable {
 
                 g2d.setColor(Color.BLUE);
 
-                double rangeHeightFactor = range / (height * 0.8);
-
                 for (int i = 0; i < visiblePoints - 1; i++) {
-                    double y1 = halfHeight - ((displayBuffer[i] - min) / rangeHeightFactor);
-                    double y2 = halfHeight - ((displayBuffer[i + 1] - min) / rangeHeightFactor);
+                    double y1 = height - ((displayBuffer[i] - min) / rangeHeightFactor);
+                    double y2 = height - ((displayBuffer[i + 1] - min) / rangeHeightFactor);
                     double x1 = i * pointWidth;
                     double x2 = (i + 1) * pointWidth;
                     g2d.draw(new Line2D.Double(x1, y1, x2, y2));
-                    statusLabel.setText("Coords: (" + x1 + ", " + y1 + ")(" + x2 + ", " + y2 + ")");
+                    //statusLabel.setText("Coords: (" + x1 + ", " + y1 + ")(" + x2 + ", " + y2 + ")");
                 }
             }
 
             // Labels
             g2d.setColor(Color.GRAY);
-            g2d.drawString("EEG Channel " + selectedChannel + " (μV)", 10, 15);
+            g2d.drawString("EEG Channel " + channelComboBox.getSelectedItem() + " (μV)", 10, 15);
             g2d.drawString("Time →", width - 50, height - 10);
+        }
+
+        /**
+         * Calculates the factor to scale the EEG range to the panel height.
+         *
+         * @param min    minimum EEG value
+         * @param max    maximum EEG value
+         * @param height height of the panel
+         * @return scaling factor
+         */
+        private double getRangeHeightFactor(double min, double max, int height) {
+            double range = max - min;
+            if (range == 0) range = 1; // Avoid division by zero
+            return range / (height * 0.8);
         }
 
         /**
@@ -278,12 +315,6 @@ public class BCIViewer extends JFrame implements AutoCloseable {
      * Main entry point.
      */
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            try {
-                new BCIViewer();
-            } catch (BrainFlowError e) {
-                throw new RuntimeException(e);
-            }
-        });
+        SwingUtilities.invokeLater(BCIViewer::new);
     }
 }
