@@ -39,6 +39,11 @@ public class BCIViewer extends JFrame implements AutoCloseable {
     private int selectedChannel = 0;
     private JLabel dataLabel;
 
+    private JLabel labelLineX1;
+    private JLabel labelLineX2;
+    private JLabel labelLineY1;
+    private JLabel labelLineY2;
+
     /**
      * Constructor to set up the GUI and BrainFlow session.
      */
@@ -56,12 +61,12 @@ public class BCIViewer extends JFrame implements AutoCloseable {
         // UI is created in the constructor
         setTitle("BrainFlow BCI Data Viewer");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLayout(new BorderLayout());
+        setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
         setExtendedState(JFrame.MAXIMIZED_BOTH);
 
-        JPanel northPanel = new JPanel(new BorderLayout());
+        JPanel topPanel = new JPanel(new BorderLayout());
         statusLabel = new JLabel("Disconnected", SwingConstants.CENTER);
-        northPanel.add(statusLabel, BorderLayout.WEST);
+        topPanel.add(statusLabel);
 
         // Channel selection
         java.util.List<String> eegComboBoxLabels = new ArrayList<>();
@@ -80,19 +85,71 @@ public class BCIViewer extends JFrame implements AutoCloseable {
         channelComboBox = new JComboBox<>(eegComboBoxLabels.toArray(new String[0]));
         channelComboBox.setEditable(false);
         channelComboBox.addActionListener(e -> selectedChannel = channelComboBox.getSelectedIndex());
-        northPanel.add(channelComboBox, BorderLayout.EAST);
-        add(northPanel, BorderLayout.NORTH);
-
-        // Control buttons
-        JPanel southPanel = new JPanel(new BorderLayout());
-        southPanel.add(createControlUI(), BorderLayout.CENTER);
-        southPanel.add(createDataUI(), BorderLayout.EAST);
-        add(southPanel, BorderLayout.SOUTH);
+        topPanel.add(channelComboBox, BorderLayout.EAST);
+        add(topPanel);
 
         // Chart panel
         chartPanel = new ChartPanel();
-        add(chartPanel, BorderLayout.CENTER);
+        add(chartPanel);
 
+        JPanel infoPanel = new JPanel(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
+        infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
+        infoPanel.add(createLineInfoUI());
+        add(infoPanel);
+
+        // Control buttons
+        JPanel bottomPanel = new JPanel(new BorderLayout());
+        bottomPanel.add(createControlUI(), BorderLayout.CENTER);
+        bottomPanel.add(createDataUI(), BorderLayout.EAST);
+        add(bottomPanel, BorderLayout.SOUTH);
+
+        initializeBoard();
+        pack();
+        setVisible(true);
+    }
+
+    /**
+     * Creates the line information UI.
+     *
+     * @return the line info UI panel
+     */
+    private JPanel createLineInfoUI() {
+        // Line info values for line coordinates
+        labelLineX1 = new JLabel("0");
+        labelLineX2 = new JLabel("0");
+        labelLineY1 = new JLabel("0");
+        labelLineY2 = new JLabel("0");
+
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+
+        JPanel x1Panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        x1Panel.add(new JLabel("X1: "));
+        x1Panel.add(labelLineX1);
+        panel.add(x1Panel);
+
+        JPanel y1Panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        y1Panel.add(new JLabel("Y1: "));
+        y1Panel.add(labelLineY1);
+        panel.add(y1Panel);
+
+        JPanel x2Panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        x2Panel.add(new JLabel("X2: "));
+        x2Panel.add(labelLineX2);
+        panel.add(x2Panel);
+
+        JPanel y2Panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        y2Panel.add(new JLabel("Y2: "));
+        y2Panel.add(labelLineY2);
+        panel.add(y2Panel);
+
+        return panel;
+    }
+
+    /**
+     * Initializes the BrainFlow board session.
+     */
+    private void initializeBoard() {
         try {
             // Initialize BrainFlow
             BoardShim.enable_dev_board_logger();
@@ -107,9 +164,6 @@ public class BCIViewer extends JFrame implements AutoCloseable {
             statusLabel.setText("Error preparing session: " + e.getMessage());
             logger.fatal(e);
         }
-
-        pack();
-        setVisible(true);
     }
 
     /**
@@ -279,7 +333,11 @@ public class BCIViewer extends JFrame implements AutoCloseable {
                     double x1 = i * pointWidth;
                     double x2 = (i + 1) * pointWidth;
                     g2d.draw(new Line2D.Double(x1, y1, x2, y2));
-                    //statusLabel.setText("Coords: (" + x1 + ", " + y1 + ")(" + x2 + ", " + y2 + ")");
+
+                    labelLineX1.setText(String.valueOf((int)x1));
+                    labelLineX2.setText(String.valueOf((int)x2));
+                    labelLineY1.setText(String.valueOf((int)y1));
+                    labelLineY2.setText(String.valueOf((int)y2));
                 }
             }
 
